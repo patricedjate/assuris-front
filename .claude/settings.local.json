@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"F:\\\\ASSURIS\\\\assurisfront\\\\src\\\\core\\\\service\")",
+      "Bash(mkdir -p \"F:\\\\ASSURIS\\\\assurisfront\\\\src\\\\core\\\\guard\")",
+      "Bash(npx ng *)",
+      "Bash(dir F:\\\\ASSURIS\\\\assurisfront\\\\src\\\\assets\\\\asset-generale\\\\css *)",
+      "PowerShell([System.IO.Directory]::GetDirectories\\(\"F:\\\\ASSURIS\\\\assurisfront\\\\src\\\\assets\"\\) | ForEach-Object { $_ })",
+      "PowerShell(cmd /c \"dir /s /b \"\"F:\\\\ASSURIS\\\\assurisfront\\\\src\\\\assets\"\" 2>&1\" | Select-Object -First 30)",
+      "PowerShell(cmd /c \"dir \"\"F:\\\\ASSURIS\\\\assurisfront\\\\src\\\\assets\"\"\")",
+      "Bash(xargs ls -la)",
+      "Bash(Get-ChildItem -Path \"F:\\\\ASSURIS\\\\assurisfront\" -Recurse -Directory -Depth 2)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "PowerShell(New-Item *)",
+      "Read(//f/ASSURIS/**)",
+      "Bash(python -c ' *)"
+    ]
+  }
+}
