@@ -1,0 +1,216 @@
+<div class="page">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Utilisateurs internes</h1>
+      <p class="page-sub">{{ users().length }} membre(s) du personnel de gestion</p>
+    </div>
+    <button class="btn-primary" (click)="openForm()">
+      <i class="fas fa-user-plus"></i> Nouvel utilisateur
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div>
+  }
+
+  @if (actionError()) {
+    <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ actionError() }}</div>
+  }
+
+  <!-- Tableau -->
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+  } @else if (users().length === 0) {
+    <div class="empty">
+      <i class="fas fa-user-tie"></i>
+      <p>Aucun utilisateur interne. Créez le premier compte de gestion.</p>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Créé le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u.id) {
+            <tr [class.row-inactive]="!u.actif">
+              <td>
+                <div class="user-cell">
+                  <span class="avatar {{ roleClass(u.role) }}">{{ initiales(u.username) }}</span>
+                  <span class="username">{{ u.username }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="role-badge {{ roleClass(u.role) }}">
+                  <i class="fas {{ u.role === 'ADMIN' ? 'fa-crown' : 'fa-user-tag' }}"></i>
+                  {{ u.role }}
+                </span>
+              </td>
+              <td>
+                @if (u.actif) {
+                  <span class="statut-badge actif"><i class="fas fa-circle"></i> Actif</span>
+                } @else {
+                  <span class="statut-badge inactif"><i class="fas fa-circle"></i> Inactif</span>
+                }
+              </td>
+              <td class="date-cell">{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="actions-cell">
+                @if (actionLoading() === u.id) {
+                  <span class="spinner-xs"></span>
+                } @else {
+                  @if (u.actif) {
+                    <button class="act-btn warn" (click)="desactiver(u)" title="Désactiver le compte">
+                      <i class="fas fa-ban"></i>
+                    </button>
+                  } @else {
+                    <button class="act-btn success" (click)="reactiver(u)" title="Réactiver le compte">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  }
+                  <button class="act-btn neutral" (click)="openReset(u)" title="Réinitialiser le mot de passe">
+                    <i class="fas fa-key"></i>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>
+
+<!-- ── Modal reset mot de passe ── -->
+@if (resetTarget()) {
+  <div class="modal-overlay" (click)="closeReset()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-icon key"><i class="fas fa-key"></i></div>
+      <h3>Réinitialiser le mot de passe</h3>
+      <p>Nouveau mot de passe pour <strong>{{ resetTarget()!.username }}</strong></p>
+
+      <div class="reset-field">
+        <div class="reset-input-box">
+          <input
+            [type]="resetShowPwd() ? 'text' : 'password'"
+            class="reset-input"
+            placeholder="Nouveau mot de passe (8 car. min.)"
+            [value]="resetPwd()"
+            (input)="resetPwd.set($any($event.target).value)"
+          />
+          <button type="button" class="reset-toggle-pw" (click)="resetShowPwd.update(v => !v)">
+            <i class="fas" [class.fa-eye]="!resetShowPwd()" [class.fa-eye-slash]="resetShowPwd()"></i>
+          </button>
+        </div>
+        @if (resetError()) {
+          <span class="reset-error"><i class="fas fa-info-circle"></i> {{ resetError() }}</span>
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeReset()" [disabled]="resetting()">Annuler</button>
+        <button class="btn-primary" (click)="submitReset()" [disabled]="resetting() || resetPwd().length < 8">
+          @if (resetting()) { <span class="spinner-sm"></span> } @else { <i class="fas fa-save"></i> }
+          Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Drawer création ── -->
+@if (showForm()) {
+  <div class="drawer-overlay" (click)="closeForm()">
+    <aside class="drawer" (click)="$event.stopPropagation()">
+
+      <div class="drawer-header">
+        <h2><i class="fas fa-user-plus"></i> Nouvel utilisateur</h2>
+        <button class="close-btn" (click)="closeForm()"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="drawer-body">
+        <p class="drawer-intro">
+          Créez un compte de gestion interne pour votre compagnie.
+          L'utilisateur recevra son identifiant et pourra se connecter immédiatement.
+        </p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+
+          <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-id-badge"></i> Identifiants</h3>
+
+            <div class="fg">
+              <label>Email (identifiant) <span class="req">*</span></label>
+              <input formControlName="username" type="email"
+                     placeholder="agent@votrecompagnie.ci"
+                     [class.invalid]="isInvalid('username')">
+              @if (isInvalid('username')) { <span class="fe">Adresse email valide requise</span> }
+            </div>
+
+            <div class="fg">
+              <label>Mot de passe initial <span class="req">*</span></label>
+              <div class="pw-box" [class.invalid]="isInvalid('password')">
+                <input formControlName="password"
+                       [type]="showPwd() ? 'text' : 'password'"
+                       placeholder="8 caractères minimum"
+                       class="pw-input">
+                <button type="button" class="pw-toggle" (click)="showPwd.update(v => !v)">
+                  <i class="fas" [class.fa-eye]="!showPwd()" [class.fa-eye-slash]="showPwd()"></i>
+                </button>
+              </div>
+              @if (isInvalid('password')) { <span class="fe">8 caractères minimum</span> }
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-user-shield"></i> Rôle & permissions</h3>
+
+            <div class="role-cards" formControlName="role">
+              <label class="role-card" [class.selected]="form.value.role === 'ADMIN'">
+                <input type="radio" formControlName="role" value="ADMIN" hidden>
+                <div class="role-card-icon admin"><i class="fas fa-crown"></i></div>
+                <div class="role-card-body">
+                  <span class="role-card-title">Administrateur</span>
+                  <span class="role-card-sub">Accès complet — clients, polices, sinistres, commissions, rapports, configuration</span>
+                </div>
+                <i class="fas fa-check-circle role-check"></i>
+              </label>
+
+              <label class="role-card" [class.selected]="form.value.role === 'AGENT'">
+                <input type="radio" formControlName="role" value="AGENT" hidden>
+                <div class="role-card-icon agent"><i class="fas fa-user-tag"></i></div>
+                <div class="role-card-body">
+                  <span class="role-card-title">Agent</span>
+                  <span class="role-card-sub">Accès limité — inscription clients, gestion polices et sinistres uniquement</span>
+                </div>
+                <i class="fas fa-check-circle role-check"></i>
+              </label>
+            </div>
+          </div>
+
+          @if (saveError()) {
+            <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ saveError() }}</div>
+          }
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="closeForm()" [disabled]="saving()">Annuler</button>
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+              @if (saving()) { <span class="spinner-sm"></span> Création… }
+              @else { <i class="fas fa-user-plus"></i> Créer le compte }
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </aside>
+  </div>
+}

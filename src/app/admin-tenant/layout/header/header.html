@@ -1,0 +1,14 @@
+<header class="app-header">
+  <button class="toggle-btn" (click)="onToggle()">
+    <i class="fas" [class.fa-bars]="!collapsed()" [class.fa-times]="collapsed()"></i>
+  </button>
+  <div class="header-right">
+    <div class="user-info">
+      <div class="user-avatar"><i class="fas fa-user-tie"></i></div>
+      <div class="user-details">
+        <span class="user-name">{{ tenantId }}</span>
+        <span class="user-role">{{ roleLabel }}</span>
+      </div>
+    </div>
+  </div>
+</header>

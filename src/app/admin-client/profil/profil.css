@@ -1,0 +1,5 @@
+.page-header { margin-bottom:1.25rem; }
+.page-title { font-size:1.3rem; font-weight:700; color:#0d3b6e; margin:0; }
+.page-subtitle { font-size:0.83rem; color:#6c757d; }
+.form-card { background:#fff; border-radius:12px; padding:1.75rem; max-width:480px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.form-label { font-size:0.82rem; font-weight:500; color:#374151; margin-bottom:0.25rem; }

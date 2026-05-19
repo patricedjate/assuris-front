@@ -1,0 +1,90 @@
+<div class="page-header">
+  <h4 class="page-title">Mon Réseau</h4>
+  <span class="page-subtitle">Votre réseau de parrainage multi-niveaux</span>
+</div>
+
+@if (loading()) {
+  <div class="loading-state"><span class="spinner-border text-primary"></span></div>
+} @else if (reseau()) {
+  <!-- Qualification -->
+  <div class="qualif-banner" [class.qualif-ok]="reseau()!.qualificationAtteinte">
+    <div class="qualif-icon">
+      <i class="fas" [class.fa-trophy]="reseau()!.qualificationAtteinte" [class.fa-bullseye]="!reseau()!.qualificationAtteinte"></i>
+    </div>
+    <div>
+      @if (reseau()!.qualificationAtteinte) {
+        <strong>Qualification atteinte !</strong>
+        <span>Vous avez {{ reseau()!.actifN1 }} filleuls N1 actifs — vous êtes éligible aux commissions.</span>
+      } @else {
+        <strong>{{ 3 - reseau()!.progressionVers3 }} filleul(s) N1 actif(s) manquant(s)</strong>
+        <span>Atteignez 3 filleuls N1 actifs pour être qualifié aux commissions.</span>
+      }
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    @for (niveau of [1, 2, 3]; track niveau) {
+      <div class="col-md-4">
+        <div class="niveau-card n{{ niveau }}">
+          <div class="niveau-header">
+            <span class="niveau-label">Niveau {{ niveau }}</span>
+            <span class="taux-badge">
+              {{ niveau === 1 ? '4%' : niveau === 2 ? '2%' : '1%' }} commission
+            </span>
+          </div>
+          <div class="niveau-stats">
+            <div class="stat">
+              <span class="stat-value">
+                {{ niveau === 1 ? reseau()!.totalN1 : niveau === 2 ? reseau()!.totalN2 : reseau()!.totalN3 }}
+              </span>
+              <span class="stat-label">Total filleuls</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+              <span class="stat-value">
+                {{ niveau === 1 ? reseau()!.actifN1 : niveau === 2 ? reseau()!.actifN2 : reseau()!.actifN3 }}
+              </span>
+              <span class="stat-label">Actifs</span>
+            </div>
+          </div>
+          @if (niveau === 1) {
+            <div class="progress-wrap">
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" [style.width.%]="progression(reseau()!.actifN1)"></div>
+              </div>
+              <span class="progress-label">{{ reseau()!.actifN1 }} / 3 pour qualification</span>
+            </div>
+          }
+
+          <!-- Liste filleuls -->
+          @if (filleuls(niveau).length > 0) {
+            <button class="toggle-filleuls" (click)="toggleNiveau(niveau)">
+              <i class="fas" [class.fa-chevron-down]="niveauOuvert() !== niveau"
+                            [class.fa-chevron-up]="niveauOuvert() === niveau"></i>
+              {{ niveauOuvert() === niveau ? 'Masquer' : 'Voir' }} les {{ filleuls(niveau).length }} filleul(s)
+            </button>
+            @if (niveauOuvert() === niveau) {
+              <ul class="filleuls-list">
+                @for (f of filleuls(niveau); track f.id) {
+                  <li class="filleul-item">
+                    <div class="filleul-row">
+                      <span class="filleul-nom">{{ f.nom }}</span>
+                      <span class="filleul-statut {{ statutFilleulClass(f.statutPolice) }}">
+                        {{ f.statutPolice }}
+                      </span>
+                    </div>
+                    <div class="filleul-meta">
+                      <span>{{ f.codeReference }}</span>
+                      <span>Inscrit le {{ f.dateInscription | date:'dd/MM/yyyy' }}</span>
+                      <span>{{ f.moisConservation }} mois de conservation</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

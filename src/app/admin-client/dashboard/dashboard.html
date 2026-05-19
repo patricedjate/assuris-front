@@ -1,0 +1,188 @@
+@if (loading()) {
+  <div class="loading-state">
+    <span class="spinner-border text-primary"></span>
+  </div>
+} @else if (data()) {
+  <div class="page-header">
+    <div>
+      <h4 class="page-title">Bonjour, {{ data()!.nom }} 👋</h4>
+      <span class="page-subtitle">Voici un résumé de votre espace assuris</span>
+    </div>
+    <span class="police-badge {{ badgeClass }}">{{ badgePoliceEffectif }}</span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-icon blue"><i class="fas fa-coins"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Total commissions</span>
+          <span class="kpi-value">{{ data()!.totalCommissions | number }} FCFA</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-icon orange"><i class="fas fa-car-crash"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Sinistres ouverts</span>
+          <span class="kpi-value">{{ data()!.sinistresOuverts }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-icon green"><i class="fas fa-users"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Filleuls N1 actifs</span>
+          <span class="kpi-value">{{ data()!.reseau.actifN1 }} / 3</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div class="kpi-icon purple"><i class="fas fa-award"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Qualification</span>
+          <span class="qualif-badge {{ qualifClass }}">{{ data()!.statutQualification }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Police active -->
+    @if (data()!.police) {
+      <div class="col-md-6">
+        <div class="info-card">
+          <div class="info-card-header">
+            <i class="fas fa-file-contract me-2"></i>Ma police active
+          </div>
+          <div class="info-card-body">
+            <div class="info-row">
+              <span class="info-label">Référence</span>
+              <span class="badge-ref">{{ data()!.police!.reference }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Type</span>
+              <span>{{ data()!.police!.typePolice }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Prime</span>
+              <span class="fw-semibold">{{ data()!.police!.prime | number }} FCFA</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Expiration</span>
+              <span>{{ data()!.police!.dateExpiration | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <!-- Barre de validité -->
+            <div class="validite-wrap">
+              <div class="validite-bar-bg">
+                <div class="validite-bar-fill"
+                  [style.width.%]="validitePercent"
+                  [style.background]="validiteColor">
+                </div>
+              </div>
+              <span class="validite-label">
+                @if (jourRestants > 0) {
+                  <span [style.color]="validiteColor">{{ jourRestants }} jour(s) restant(s)</span>
+                } @else {
+                  <span class="text-danger">Police expirée</span>
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Réseau + code parrainage -->
+    <div class="col-md-6">
+      <div class="info-card">
+        <div class="info-card-header"><i class="fas fa-project-diagram me-2"></i>Mon réseau</div>
+        <div class="info-card-body">
+          <div class="reseau-row">
+            <span class="reseau-level n1">N1</span>
+            <div class="reseau-bar-wrap">
+              <div class="reseau-bar"
+                [style.width.%]="data()!.reseau.totalN1 ? (data()!.reseau.actifN1 / data()!.reseau.totalN1) * 100 : 0">
+              </div>
+            </div>
+            <span class="reseau-stat">{{ data()!.reseau.actifN1 }} actifs / {{ data()!.reseau.totalN1 }}</span>
+          </div>
+          <div class="reseau-row">
+            <span class="reseau-level n2">N2</span>
+            <div class="reseau-bar-wrap">
+              <div class="reseau-bar"
+                [style.width.%]="data()!.reseau.totalN2 ? (data()!.reseau.actifN2 / data()!.reseau.totalN2) * 100 : 0">
+              </div>
+            </div>
+            <span class="reseau-stat">{{ data()!.reseau.actifN2 }} actifs / {{ data()!.reseau.totalN2 }}</span>
+          </div>
+          <div class="reseau-row">
+            <span class="reseau-level n3">N3</span>
+            <div class="reseau-bar-wrap">
+              <div class="reseau-bar"
+                [style.width.%]="data()!.reseau.totalN3 ? (data()!.reseau.actifN3 / data()!.reseau.totalN3) * 100 : 0">
+              </div>
+            </div>
+            <span class="reseau-stat">{{ data()!.reseau.actifN3 }} actifs / {{ data()!.reseau.totalN3 }}</span>
+          </div>
+
+          <!-- Code parrainage + partage -->
+          <div class="code-parrain-box">
+            <div class="code-parrain-row">
+              <span class="info-label">Mon code parrainage</span>
+              <span class="code-parrain">{{ data()!.codeParrainage }}</span>
+            </div>
+            <div class="share-actions">
+              <button class="share-btn copy" (click)="copierCode()" title="Copier">
+                @if (copie()) {
+                  <i class="fas fa-check"></i>
+                } @else {
+                  <i class="fas fa-copy"></i>
+                }
+              </button>
+              <a class="share-btn whatsapp" [href]="whatsappUrl" target="_blank" title="Partager sur WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+              </a>
+              <a class="share-btn sms" [href]="smsUrl" title="Partager par SMS">
+                <i class="fas fa-sms"></i>
+              </a>
+            </div>
+          </div>
+          @if (copie()) {
+            <span class="copie-confirm">Code copié !</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Derniers sinistres -->
+    @if (data()!.dernieresSinistres.length > 0) {
+      <div class="col-12">
+        <div class="info-card">
+          <div class="info-card-header"><i class="fas fa-history me-2"></i>Derniers sinistres</div>
+          <div class="info-card-body p-0">
+            <table class="table mini-table">
+              <thead>
+                <tr><th>Référence</th><th>Date</th><th>Lieu</th><th>Statut</th></tr>
+              </thead>
+              <tbody>
+                @for (s of data()!.dernieresSinistres; track s.id) {
+                  <tr>
+                    <td class="text-mono">{{ s.reference }}</td>
+                    <td>{{ s.dateSinistre | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ s.lieu }}</td>
+                    <td><span class="statut-badge statut-{{ s.statut }}">{{ s.statut }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

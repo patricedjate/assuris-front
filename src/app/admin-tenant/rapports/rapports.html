@@ -1,0 +1,118 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Rapports CIMA</h1>
+      <p class="page-sub">Génération des rapports réglementaires (PDF / Excel)</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div>
+  }
+
+  <div class="rapports-grid">
+
+    <!-- Rapport mensuel -->
+    <div class="rapport-card">
+      <div class="rapport-icon blue"><i class="fas fa-calendar-day"></i></div>
+      <h3>Rapport mensuel</h3>
+      <p>Primes encaissées, nouvelles polices, sinistres déclarés par mois.</p>
+      <form [formGroup]="mensuelForm" (ngSubmit)="downloadMensuel()">
+        <div class="form-row">
+          <div class="fg">
+            <label>Année</label>
+            <select formControlName="annee">
+              @for (y of years; track y) { <option [value]="y">{{ y }}</option> }
+            </select>
+          </div>
+          <div class="fg">
+            <label>Mois</label>
+            <select formControlName="mois">
+              @for (m of mois; track m.val) { <option [value]="m.val">{{ m.label }}</option> }
+            </select>
+          </div>
+        </div>
+        <div class="format-row">
+          <label class="radio-opt" [class.active]="mensuelForm.value.format === 'pdf'">
+            <input type="radio" formControlName="format" value="pdf"> PDF
+          </label>
+          <label class="radio-opt" [class.active]="mensuelForm.value.format === 'excel'">
+            <input type="radio" formControlName="format" value="excel"> Excel
+          </label>
+        </div>
+        <button type="submit" class="btn-download" [disabled]="downloading() === 'mensuel'">
+          @if (downloading() === 'mensuel') { <span class="spinner-sm"></span> Génération… }
+          @else { <i class="fas fa-download"></i> Télécharger }
+        </button>
+      </form>
+    </div>
+
+    <!-- Rapport trimestriel -->
+    <div class="rapport-card">
+      <div class="rapport-icon purple"><i class="fas fa-calendar-week"></i></div>
+      <h3>Rapport trimestriel</h3>
+      <p>Sinistres et commissions par trimestre.</p>
+      <form [formGroup]="trimestrielForm" (ngSubmit)="downloadTrimestriel()">
+        <div class="form-row">
+          <div class="fg">
+            <label>Année</label>
+            <select formControlName="annee">
+              @for (y of years; track y) { <option [value]="y">{{ y }}</option> }
+            </select>
+          </div>
+          <div class="fg">
+            <label>Trimestre</label>
+            <select formControlName="trimestre">
+              <option [value]="1">T1 (Jan–Mar)</option>
+              <option [value]="2">T2 (Avr–Jun)</option>
+              <option [value]="3">T3 (Jul–Sep)</option>
+              <option [value]="4">T4 (Oct–Déc)</option>
+            </select>
+          </div>
+        </div>
+        <div class="format-row">
+          <label class="radio-opt" [class.active]="trimestrielForm.value.format === 'pdf'">
+            <input type="radio" formControlName="format" value="pdf"> PDF
+          </label>
+          <label class="radio-opt" [class.active]="trimestrielForm.value.format === 'excel'">
+            <input type="radio" formControlName="format" value="excel"> Excel
+          </label>
+        </div>
+        <button type="submit" class="btn-download" [disabled]="downloading() === 'trimestriel'">
+          @if (downloading() === 'trimestriel') { <span class="spinner-sm"></span> Génération… }
+          @else { <i class="fas fa-download"></i> Télécharger }
+        </button>
+      </form>
+    </div>
+
+    <!-- Rapport annuel -->
+    <div class="rapport-card">
+      <div class="rapport-icon green"><i class="fas fa-calendar-alt"></i></div>
+      <h3>Rapport annuel</h3>
+      <p>Production annuelle complète de la compagnie.</p>
+      <form [formGroup]="annuelForm" (ngSubmit)="downloadAnnuel()">
+        <div class="form-row">
+          <div class="fg" style="grid-column:1/-1">
+            <label>Année</label>
+            <select formControlName="annee">
+              @for (y of years; track y) { <option [value]="y">{{ y }}</option> }
+            </select>
+          </div>
+        </div>
+        <div class="format-row">
+          <label class="radio-opt" [class.active]="annuelForm.value.format === 'pdf'">
+            <input type="radio" formControlName="format" value="pdf"> PDF
+          </label>
+          <label class="radio-opt" [class.active]="annuelForm.value.format === 'excel'">
+            <input type="radio" formControlName="format" value="excel"> Excel
+          </label>
+        </div>
+        <button type="submit" class="btn-download" [disabled]="downloading() === 'annuel'">
+          @if (downloading() === 'annuel') { <span class="spinner-sm"></span> Génération… }
+          @else { <i class="fas fa-download"></i> Télécharger }
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="page-header">
+  <h4 class="page-title">Mon Profil</h4>
+  <span class="page-subtitle">Modifier votre mot de passe</span>
+</div>
+
+<div class="form-card">
+  @if (successMessage()) {
+    <div class="alert alert-success d-flex align-items-center gap-2">
+      <i class="fas fa-check-circle"></i>{{ successMessage() }}
+    </div>
+  }
+  @if (errorMessage()) {
+    <div class="alert alert-danger d-flex align-items-center gap-2">
+      <i class="fas fa-exclamation-circle"></i>{{ errorMessage() }}
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="mb-3">
+      <label class="form-label">Mot de passe actuel *</label>
+      <input type="password" class="form-control" formControlName="ancienMdp"
+        [class.is-invalid]="isInvalid('ancienMdp')">
+      @if (isInvalid('ancienMdp')) {
+        <div class="invalid-feedback">Champ obligatoire.</div>
+      }
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nouveau mot de passe *</label>
+      <input type="password" class="form-control" formControlName="nouveauMdp"
+        [class.is-invalid]="isInvalid('nouveauMdp')">
+      @if (isInvalid('nouveauMdp')) {
+        <div class="invalid-feedback">Minimum 6 caractères.</div>
+      }
+    </div>
+    <div class="mb-4">
+      <label class="form-label">Confirmer le nouveau mot de passe *</label>
+      <input type="password" class="form-control" formControlName="confirmMdp"
+        [class.is-invalid]="isInvalid('confirmMdp')">
+      @if (isInvalid('confirmMdp')) {
+        <div class="invalid-feedback">Champ obligatoire.</div>
+      }
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="loading()">
+      @if (loading()) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+      } @else {
+        <i class="fas fa-save me-2"></i>
+      }
+      Enregistrer
+    </button>
+  </form>
+</div>

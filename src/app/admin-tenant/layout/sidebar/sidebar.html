@@ -1,0 +1,29 @@
+<aside class="sidebar" [class.collapsed]="collapsed()">
+  <div class="sidebar-brand">
+    <span class="brand-icon"><i class="fas fa-shield-alt"></i></span>
+    @if (!collapsed()) { <span class="brand-name">ASSURIS</span> }
+  </div>
+
+  @if (!collapsed()) {
+    <div class="sidebar-badge">
+      <span class="role-badge">{{ roleLabel }}</span>
+    </div>
+  }
+
+  <nav class="sidebar-nav">
+    @for (item of navItems(); track item.route) {
+      <a class="nav-item" [routerLink]="item.route" routerLinkActive="active"
+         [title]="collapsed() ? item.label : ''">
+        <i class="fas {{ item.icon }} nav-icon"></i>
+        @if (!collapsed()) { <span class="nav-label">{{ item.label }}</span> }
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="nav-item logout-btn" (click)="logout()" [title]="collapsed() ? 'Déconnexion' : ''">
+      <i class="fas fa-sign-out-alt nav-icon"></i>
+      @if (!collapsed()) { <span class="nav-label">Déconnexion</span> }
+    </button>
+  </div>
+</aside>

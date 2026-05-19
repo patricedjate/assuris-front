@@ -1,0 +1,401 @@
+<div class="page">
+
+  <!-- ═══════════════════════════════════════════════
+       VUE AGENT
+  ════════════════════════════════════════════════ -->
+  @if (isAgent) {
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Votre espace de travail</h1>
+        <p class="page-sub">{{ today | date:"EEEE d MMMM yyyy" : '' : 'fr' }} — actions à traiter en priorité</p>
+      </div>
+    </div>
+
+    @if (actionError()) {
+      <div class="alert-error mb"><i class="fas fa-exclamation-circle"></i> {{ actionError() }}</div>
+    }
+
+    @if (sectionsLoading()) {
+      <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+    } @else {
+
+      <!-- Stat cards AGENT -->
+      <div class="agent-stats">
+
+        <div class="agent-stat-card urgent">
+          <div class="agent-stat-icon"><i class="fas fa-file-alt"></i></div>
+          <div class="agent-stat-body">
+            <span class="agent-stat-value">{{ policesEnAttente().length }}</span>
+            <span class="agent-stat-label">Polices à activer</span>
+          </div>
+          <a routerLink="/admin-tenant/polices" class="agent-stat-link">
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="agent-stat-card warn">
+          <div class="agent-stat-icon"><i class="fas fa-credit-card"></i></div>
+          <div class="agent-stat-body">
+            <span class="agent-stat-value">{{ paiementsEnAttente().length }}</span>
+            <span class="agent-stat-label">Paiements à valider</span>
+          </div>
+          <a routerLink="/admin-tenant/paiements" class="agent-stat-link">
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="agent-stat-card red">
+          <div class="agent-stat-icon"><i class="fas fa-car-crash"></i></div>
+          <div class="agent-stat-body">
+            <span class="agent-stat-value">{{ sinistresRecents().length }}</span>
+            <span class="agent-stat-label">Sinistres à traiter</span>
+          </div>
+          <a routerLink="/admin-tenant/sinistres" class="agent-stat-link">
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="agent-stat-card yellow">
+          <div class="agent-stat-icon"><i class="fas fa-calendar-times"></i></div>
+          <div class="agent-stat-body">
+            <span class="agent-stat-value">{{ policesExpirant().length }}</span>
+            <span class="agent-stat-label">Polices expirant (30j)</span>
+          </div>
+          <a routerLink="/admin-tenant/polices" class="agent-stat-link">
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Ligne 1 : Polices EN_ATTENTE | Paiements EN_ATTENTE -->
+      <div class="mid-grid">
+
+        <!-- Polices à activer -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-header-left">
+              <span class="section-dot urgent-dot"></span>
+              <h2 class="section-title">Polices à activer</h2>
+            </div>
+            <a class="see-all" routerLink="/admin-tenant/polices">Voir toutes <i class="fas fa-arrow-right"></i></a>
+          </div>
+
+          @if (policesEnAttente().length === 0) {
+            <div class="section-empty success">
+              <i class="fas fa-check-circle"></i>
+              <span>Aucune police en attente d'activation.</span>
+            </div>
+          } @else {
+            <table class="mini-table">
+              <thead><tr><th>Référence</th><th>Type</th><th>Effet</th><th></th></tr></thead>
+              <tbody>
+                @for (p of policesEnAttente(); track p.id) {
+                  <tr>
+                    <td><span class="badge-ref">{{ p.reference }}</span></td>
+                    <td><span class="type-chip">{{ p.typePolice }}</span></td>
+                    <td class="date-cell">{{ p.dateEffet | date:'dd/MM/yyyy' }}</td>
+                    <td class="action-col">
+                      @if (activatingPolice() === p.id) {
+                        <span class="spinner-xs"></span>
+                      } @else {
+                        <button class="inline-btn green" (click)="activerPolice(p.id)" title="Activer la police">
+                          <i class="fas fa-play"></i> Activer
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <!-- Paiements à valider -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-header-left">
+              <span class="section-dot warn-dot"></span>
+              <h2 class="section-title">Paiements à valider</h2>
+            </div>
+            <a class="see-all" routerLink="/admin-tenant/paiements">Voir tous <i class="fas fa-arrow-right"></i></a>
+          </div>
+
+          @if (paiementsEnAttente().length === 0) {
+            <div class="section-empty success">
+              <i class="fas fa-check-circle"></i>
+              <span>Aucun paiement en attente de validation.</span>
+            </div>
+          } @else {
+            <table class="mini-table">
+              <thead><tr><th>Référence</th><th>Montant</th><th>Mode</th><th></th></tr></thead>
+              <tbody>
+                @for (p of paiementsEnAttente(); track p.id) {
+                  <tr>
+                    <td><span class="badge-ref">{{ p.reference }}</span></td>
+                    <td class="amount-cell">{{ p.montant | number }} XOF</td>
+                    <td><span class="mode-chip">{{ modeLabel(p.mode) }}</span></td>
+                    <td class="action-col">
+                      @if (validatingPaiement() === p.id) {
+                        <span class="spinner-xs"></span>
+                      } @else {
+                        <button class="inline-btn blue" (click)="validerPaiement(p.id)" title="Valider le paiement">
+                          <i class="fas fa-check"></i> Valider
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+      </div>
+
+      <!-- Ligne 2 : Polices expirant | Sinistres à compléter -->
+      <div class="mid-grid">
+
+        <!-- Polices expirant -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-header-left">
+              <span class="section-dot yellow-dot"></span>
+              <h2 class="section-title">Polices expirant bientôt</h2>
+            </div>
+            <a class="see-all" routerLink="/admin-tenant/polices">Voir toutes <i class="fas fa-arrow-right"></i></a>
+          </div>
+
+          @if (policesExpirant().length === 0) {
+            <div class="section-empty success">
+              <i class="fas fa-check-circle"></i>
+              <span>Aucune police n'expire dans les 30 prochains jours.</span>
+            </div>
+          } @else {
+            <table class="mini-table">
+              <thead><tr><th>Référence</th><th>Type</th><th>Expiration</th><th>Jours</th></tr></thead>
+              <tbody>
+                @for (p of policesExpirant(); track p.id) {
+                  <tr>
+                    <td><span class="badge-ref">{{ p.reference }}</span></td>
+                    <td><span class="type-chip">{{ p.typePolice }}</span></td>
+                    <td class="date-cell">{{ p.dateExpiration | date:'dd/MM/yyyy' }}</td>
+                    <td>
+                      <span class="jours-badge {{ joursClass(joursRestants(p.dateExpiration)) }}">
+                        {{ joursRestants(p.dateExpiration) }}j
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <!-- Sinistres à traiter -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-header-left">
+              <span class="section-dot red-dot"></span>
+              <h2 class="section-title">Sinistres à compléter</h2>
+            </div>
+            <a class="see-all" routerLink="/admin-tenant/sinistres">Voir tous <i class="fas fa-arrow-right"></i></a>
+          </div>
+
+          @if (sinistresRecents().length === 0) {
+            <div class="section-empty success">
+              <i class="fas fa-check-circle"></i>
+              <span>Aucun sinistre ouvert en attente de traitement.</span>
+            </div>
+          } @else {
+            <table class="mini-table">
+              <thead><tr><th>Référence</th><th>Date</th><th>Lieu</th><th>Statut</th></tr></thead>
+              <tbody>
+                @for (s of sinistresRecents(); track s.id) {
+                  <tr>
+                    <td><span class="badge-ref">{{ s.reference }}</span></td>
+                    <td class="date-cell">{{ s.dateSinistre | date:'dd/MM/yyyy' }}</td>
+                    <td class="lieu-cell" [title]="s.lieu">{{ s.lieu }}</td>
+                    <td>
+                      <span class="sin-badge {{ sinistreStatutClass(s.statut) }}">{{ s.statut }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+      </div>
+
+    }
+
+  } @else {
+
+  <!-- ═══════════════════════════════════════════════
+       VUE ADMIN
+  ════════════════════════════════════════════════ -->
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Tableau de bord</h1>
+        <p class="page-sub">Activité de votre compagnie</p>
+      </div>
+      <div class="periode-tabs">
+        @for (p of periodes; track p.value) {
+          <button class="tab" [class.active]="periode() === p.value" (click)="changePeriode(p.value)">
+            {{ p.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (kpisLoading()) {
+      <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+    } @else if (kpisError()) {
+      <div class="alert-error mb"><i class="fas fa-exclamation-circle"></i> {{ kpisError() }}</div>
+    } @else if (kpis(); as k) {
+      <div class="kpi-grid">
+        <div class="kpi-card green">
+          <div class="kpi-icon"><i class="fas fa-coins"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ formatXof(k.primesEncaissees) }}</span>
+            <span class="kpi-label">Primes encaissées</span>
+          </div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-icon"><i class="fas fa-users"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ k.clientsActifs | number }}</span>
+            <span class="kpi-label">Clients actifs</span>
+          </div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-icon"><i class="fas fa-project-diagram"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ k.parrainagesActifs | number }}</span>
+            <span class="kpi-label">Parrainages actifs</span>
+          </div>
+        </div>
+        <div class="kpi-card orange">
+          <div class="kpi-icon"><i class="fas fa-percentage"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ formatXof(k.commissionsDues) }}</span>
+            <span class="kpi-label">Commissions dues</span>
+          </div>
+        </div>
+        <div class="kpi-card yellow">
+          <div class="kpi-icon"><i class="fas fa-calendar-times"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ k.policesExpirant30j | number }}</span>
+            <span class="kpi-label">Polices expirant (30j)</span>
+          </div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-icon"><i class="fas fa-car-crash"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ k.sinistresOuverts | number }}</span>
+            <span class="kpi-label">Sinistres ouverts</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Sections intermédiaires -->
+    @if (!sectionsLoading()) {
+      <div class="mid-grid">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-header-left">
+              <i class="fas fa-calendar-times section-icon yellow-icon"></i>
+              <h2 class="section-title">Polices expirant bientôt</h2>
+            </div>
+            <a class="see-all" routerLink="/admin-tenant/polices">Voir toutes <i class="fas fa-arrow-right"></i></a>
+          </div>
+          @if (policesExpirant().length === 0) {
+            <div class="section-empty success"><i class="fas fa-check-circle"></i><span>Aucune police n'expire dans les 30 prochains jours.</span></div>
+          } @else {
+            <table class="mini-table">
+              <thead><tr><th>Référence</th><th>Type</th><th>Expiration</th><th>Jours</th></tr></thead>
+              <tbody>
+                @for (p of policesExpirant(); track p.id) {
+                  <tr>
+                    <td><span class="badge-ref">{{ p.reference }}</span></td>
+                    <td><span class="police-type-badge {{ policeStatutClass(p.statut) }}">{{ p.typePolice }}</span></td>
+                    <td class="date-cell">{{ p.dateExpiration | date:'dd/MM/yyyy' }}</td>
+                    <td><span class="jours-badge {{ joursClass(joursRestants(p.dateExpiration)) }}">{{ joursRestants(p.dateExpiration) }}j</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-header-left">
+              <i class="fas fa-car-crash section-icon red-icon"></i>
+              <h2 class="section-title">Sinistres en cours</h2>
+            </div>
+            <a class="see-all" routerLink="/admin-tenant/sinistres">Voir tous <i class="fas fa-arrow-right"></i></a>
+          </div>
+          @if (sinistresRecents().length === 0) {
+            <div class="section-empty success"><i class="fas fa-check-circle"></i><span>Aucun sinistre en cours de traitement.</span></div>
+          } @else {
+            <table class="mini-table">
+              <thead><tr><th>Référence</th><th>Date</th><th>Lieu</th><th>Statut</th></tr></thead>
+              <tbody>
+                @for (s of sinistresRecents(); track s.id) {
+                  <tr>
+                    <td><span class="badge-ref">{{ s.reference }}</span></td>
+                    <td class="date-cell">{{ s.dateSinistre | date:'dd/MM/yyyy' }}</td>
+                    <td class="lieu-cell" [title]="s.lieu">{{ s.lieu }}</td>
+                    <td><span class="sin-badge {{ sinistreStatutClass(s.statut) }}">{{ s.statut }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Alertes -->
+    <div class="alertes-section">
+      <div class="alertes-header">
+        <div class="section-header-left">
+          <i class="fas fa-bell section-icon yellow-icon"></i>
+          <h2 class="alertes-title">Alertes</h2>
+        </div>
+        <div class="alertes-actions">
+          @if (lancerSuccess()) {
+            <span class="lancer-ok"><i class="fas fa-check"></i> {{ lancerSuccess() }}</span>
+          }
+          <button class="btn-lancer" (click)="lancerAlertes()" [disabled]="lancerLoading()">
+            @if (lancerLoading()) { <span class="spinner-xs-inline"></span> } @else { <i class="fas fa-paper-plane"></i> }
+            Lancer alertes J-30 / J-7
+          </button>
+        </div>
+      </div>
+      @if (alertesLoading()) {
+        <div class="alertes-loading"><span class="spinner-xs-inline"></span> Chargement des alertes…</div>
+      } @else if (alertes().length === 0) {
+        <div class="alertes-empty"><i class="fas fa-check-circle"></i><span>Aucune alerte active — tout est en ordre.</span></div>
+      } @else {
+        <div class="alertes-list">
+          @for (a of alertes(); track $index) {
+            <div class="alerte-card {{ alerteClass(a.type) }}">
+              <div class="alerte-icon"><i class="fas {{ alerteIcon(a.type) }}"></i></div>
+              <div class="alerte-body">
+                <p class="alerte-message">{{ a.message }}</p>
+                @if (a.action) { <p class="alerte-action"><i class="fas fa-arrow-right"></i> {{ a.action }}</p> }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+</div>

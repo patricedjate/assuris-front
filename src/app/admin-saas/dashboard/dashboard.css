@@ -1,0 +1,107 @@
+.dashboard-page { padding: 0; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.page-title { font-size: 1.5rem; font-weight: 700; color: #0d3b6e; margin: 0 0 0.25rem; }
+.page-subtitle { color: #64748b; font-size: 0.875rem; margin: 0; }
+
+.loading-state {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1rem; padding: 4rem 0; color: #64748b;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #e2e8f0; border-top-color: #1565c0;
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-banner {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 1rem 1.25rem; background: #fef2f2;
+  border: 1px solid #fecaca; border-radius: 10px; color: #dc2626;
+}
+
+/* KPI Cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #fff; border-radius: 14px; padding: 1.5rem;
+  display: flex; align-items: center; gap: 1.25rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06); border: 1px solid #e8ecf0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+.stat-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; flex-shrink: 0;
+}
+.stat-body { display: flex; flex-direction: column; gap: 0.2rem; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; line-height: 1.2; }
+.stat-label { font-size: 0.8rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.tenants .stat-icon  { background: #e0f2fe; color: #0284c7; }
+.users .stat-icon    { background: #f3e8ff; color: #7c3aed; }
+.clients .stat-icon  { background: #d1fae5; color: #059669; }
+.polices .stat-icon  { background: #fef3c7; color: #d97706; }
+
+/* Recent tenants card */
+.section-card {
+  background: #fff; border-radius: 14px; border: 1px solid #e8ecf0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06); overflow: hidden;
+}
+.section-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.5rem; border-bottom: 1px solid #f1f5f9;
+}
+.section-card-title {
+  font-size: 0.95rem; font-weight: 700; color: #0d3b6e; margin: 0;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.section-card-title i { color: #1565c0; }
+.link-all {
+  font-size: 0.8rem; font-weight: 600; color: #1565c0;
+  text-decoration: none; display: flex; align-items: center; gap: 0.35rem;
+  transition: color 0.15s;
+}
+.link-all:hover { color: #0d3b6e; }
+
+.mini-table-wrap { overflow-x: auto; }
+.mini-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.mini-table thead tr { background: #f8fafc; }
+.mini-table th {
+  padding: 0.75rem 1rem; text-align: left;
+  font-size: 0.72rem; font-weight: 600; color: #64748b;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.mini-table td { padding: 0.85rem 1rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+.mini-table tbody tr:last-child td { border-bottom: none; }
+.mini-table tbody tr:hover td { background: #f8fafc; }
+.text-right { text-align: right; }
+
+.badge-id {
+  display: inline-block; padding: 0.2rem 0.6rem;
+  background: #e0f2fe; color: #0284c7;
+  border-radius: 20px; font-size: 0.75rem; font-weight: 600; font-family: monospace;
+}
+.company-name { font-weight: 600; color: #0d3b6e; }
+
+.licence-badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.2rem 0.65rem; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 600;
+}
+.badge-active   { background: #d1fae5; color: #065f46; }
+.badge-expired  { background: #fee2e2; color: #991b1b; }
+.badge-suspended { background: #fef3c7; color: #92400e; }

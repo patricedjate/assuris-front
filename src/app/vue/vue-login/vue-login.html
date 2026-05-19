@@ -1,0 +1,140 @@
+<div class="login-root">
+
+  <!-- ── Panneau gauche — branding ── -->
+  <div class="left-panel">
+    <div class="left-bg">
+      <div class="left-circle c1"></div>
+      <div class="left-circle c2"></div>
+      <div class="left-circle c3"></div>
+    </div>
+
+    <div class="left-content">
+      <div class="brand">
+        <span class="brand-icon"><i class="fas fa-shield-alt"></i></span>
+        <span class="brand-name">ASSURIS</span>
+      </div>
+
+      <h1 class="left-title">
+        La plateforme SaaS de gestion d'assurance automobile
+      </h1>
+      <p class="left-sub">
+        Gérez polices, sinistres, commissions et rapports CIMA depuis un seul espace sécurisé — conforme aux normes ivoiriennes.
+      </p>
+
+      <ul class="features">
+        <li>
+          <span class="feat-icon"><i class="fas fa-building"></i></span>
+          <span>Architecture multi-tenant isolée</span>
+        </li>
+        <li>
+          <span class="feat-icon"><i class="fas fa-file-contract"></i></span>
+          <span>Normes CIMA intégrées</span>
+        </li>
+        <li>
+          <span class="feat-icon"><i class="fas fa-project-diagram"></i></span>
+          <span>Parrainage à 3 niveaux (4 % / 2 % / 1 %)</span>
+        </li>
+        <li>
+          <span class="feat-icon"><i class="fas fa-file-pdf"></i></span>
+          <span>Documents officiels PDF (attestation, carte verte)</span>
+        </li>
+      </ul>
+
+      <div class="left-footer">
+        <span class="cima-badge"><i class="fas fa-check-circle"></i> Certifié conforme CIMA</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Panneau droit — formulaire ── -->
+  <div class="right-panel">
+    <div class="form-wrap">
+
+      <!-- Logo mobile (visible uniquement sur petit écran) -->
+      <div class="mobile-brand">
+        <span class="brand-icon-sm"><i class="fas fa-shield-alt"></i></span>
+        <span class="brand-name-sm">ASSURIS</span>
+      </div>
+
+      <div class="form-header">
+        <h2 class="form-title">Connexion</h2>
+        <p class="form-sub">Accédez à votre espace ASSURIS</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-alert" role="alert">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="login-form">
+
+        <!-- Identifiant -->
+        <div class="field">
+          <label for="username" class="field-label">Identifiant</label>
+          <div class="input-box" [class.is-invalid]="isInvalid('username')">
+            <i class="fas fa-user input-ico"></i>
+            <input
+              id="username"
+              type="text"
+              formControlName="username"
+              placeholder="email&#64;compagnie.ci ou +225XXXXXXXXXX"
+              autocomplete="username"
+              class="input-field"
+            />
+          </div>
+          @if (isInvalid('username')) {
+            <span class="field-error"><i class="fas fa-info-circle"></i> Ce champ est requis.</span>
+          }
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="field">
+          <label for="password" class="field-label">Mot de passe</label>
+          <div class="input-box" [class.is-invalid]="isInvalid('password')">
+            <i class="fas fa-lock input-ico"></i>
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Votre mot de passe"
+              autocomplete="current-password"
+              class="input-field"
+            />
+            <button
+              type="button"
+              class="toggle-pw"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+            >
+              <i class="fas" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()"></i>
+            </button>
+          </div>
+          @if (isInvalid('password')) {
+            <span class="field-error"><i class="fas fa-info-circle"></i> Ce champ est requis.</span>
+          }
+        </div>
+
+        <!-- Bouton connexion -->
+        <button type="submit" class="btn-submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner"></span>
+            Connexion en cours…
+          } @else {
+            <i class="fas fa-sign-in-alt"></i>
+            Se connecter
+          }
+        </button>
+
+      </form>
+
+      <p class="form-note">
+        <i class="fas fa-lock-open"></i>
+        Plateforme réservée aux compagnies d'assurance partenaires ASSURIS.
+      </p>
+
+    </div>
+  </div>
+
+</div>

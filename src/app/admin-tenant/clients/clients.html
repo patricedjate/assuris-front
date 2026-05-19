@@ -1,0 +1,309 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Clients</h1>
+      <p class="page-sub">{{ data()?.totalElements ?? 0 }} client(s) enregistré(s)</p>
+    </div>
+    <button class="btn-primary" (click)="openForm()"><i class="fas fa-user-plus"></i> Inscrire un client</button>
+  </div>
+
+  @if (error()) { <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+  } @else if (data()?.contenu?.length === 0) {
+    <div class="empty"><i class="fas fa-users"></i><p>Aucun client trouvé.</p></div>
+  } @else {
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nom</th><th>CNI</th><th>Téléphone</th>
+            <th>Code parrainage</th><th>Réf. client</th>
+            <th>Inscription</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of data()?.contenu ?? []; track c.id) {
+            <tr>
+              <td class="fw-bold">{{ c.nom }}</td>
+              <td><code>{{ c.cni }}</code></td>
+              <td>{{ c.telephone }}</td>
+              <td><span class="badge-code">{{ c.codeParrainage }}</span></td>
+              <td><span class="badge-ref">{{ c.codeReference }}</span></td>
+              <td>{{ c.dateInscription | date:'dd/MM/yyyy' }}</td>
+              <td class="actions">
+                <button class="btn-icon info" (click)="voirReseau(c)" title="Voir réseau de parrainage"><i class="fas fa-project-diagram"></i></button>
+                <button class="btn-icon danger" (click)="askDelete(c.id)" title="Supprimer"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if ((data()?.totalPages ?? 0) > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="data()?.premiere" (click)="goPage(page() - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        @for (p of pages; track p) {
+          <button class="page-btn" [class.active]="p === page()" (click)="goPage(p)">{{ p + 1 }}</button>
+        }
+        <button class="page-btn" [disabled]="data()?.derniere" (click)="goPage(page() + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    }
+  }
+
+  <!-- Modal arbre de parrainage -->
+  @if (reseauClientNom() !== null) {
+    <div class="modal-overlay" (click)="fermerReseau()">
+      <div class="reseau-modal" (click)="$event.stopPropagation()">
+        <div class="reseau-modal-header">
+          <div>
+            <h3 class="reseau-modal-title"><i class="fas fa-project-diagram me-2"></i>Réseau de {{ reseauClientNom() }}</h3>
+            <p class="reseau-modal-sub">Arbre de parrainage à 3 niveaux</p>
+          </div>
+          <div class="reseau-modal-actions">
+            <button class="btn-print" (click)="printReseau()" title="Exporter en PDF"><i class="fas fa-print me-1"></i>Imprimer</button>
+            <button class="close-btn" (click)="fermerReseau()"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        <div class="reseau-modal-body">
+          @if (reseauLoading()) {
+            <div class="reseau-loading"><span class="spinner-border spinner-border-sm text-primary me-2"></span>Chargement du réseau…</div>
+          } @else if (reseauData().length === 0) {
+            <div class="reseau-empty"><i class="fas fa-users-slash"></i><p>Aucun filleul enregistré.</p></div>
+          } @else {
+            <ul class="tree-root">
+              @for (n1 of reseauData(); track n1.id) {
+                <li class="tree-node">
+                  <div class="tree-item" (click)="toggleReseauNode(n1.id)">
+                    <span class="tree-toggle">
+                      <i class="fas" [class.fa-chevron-right]="!isExpanded(n1.id) && n1.filleuls?.length"
+                                    [class.fa-chevron-down]="isExpanded(n1.id)"
+                                    [class.fa-minus]="!n1.filleuls?.length"></i>
+                    </span>
+                    <span class="tree-niveau n1">N1</span>
+                    <span class="tree-nom">{{ n1.nom }}</span>
+                    <span class="tree-ref">{{ n1.codeReference }}</span>
+                    <span class="tree-statut {{ statutNodeClass(n1.statutPolice) }}">{{ n1.statutPolice }}</span>
+                    <span class="tree-date">{{ n1.dateInscription | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  @if (isExpanded(n1.id) && n1.filleuls?.length) {
+                    <ul class="tree-children">
+                      @for (n2 of n1.filleuls!; track n2.id) {
+                        <li class="tree-node">
+                          <div class="tree-item" (click)="toggleReseauNode(n2.id)">
+                            <span class="tree-toggle">
+                              <i class="fas" [class.fa-chevron-right]="!isExpanded(n2.id) && n2.filleuls?.length"
+                                            [class.fa-chevron-down]="isExpanded(n2.id)"
+                                            [class.fa-minus]="!n2.filleuls?.length"></i>
+                            </span>
+                            <span class="tree-niveau n2">N2</span>
+                            <span class="tree-nom">{{ n2.nom }}</span>
+                            <span class="tree-ref">{{ n2.codeReference }}</span>
+                            <span class="tree-statut {{ statutNodeClass(n2.statutPolice) }}">{{ n2.statutPolice }}</span>
+                            <span class="tree-date">{{ n2.dateInscription | date:'dd/MM/yyyy' }}</span>
+                          </div>
+                          @if (isExpanded(n2.id) && n2.filleuls?.length) {
+                            <ul class="tree-children">
+                              @for (n3 of n2.filleuls!; track n3.id) {
+                                <li class="tree-node">
+                                  <div class="tree-item">
+                                    <span class="tree-toggle"><i class="fas fa-minus"></i></span>
+                                    <span class="tree-niveau n3">N3</span>
+                                    <span class="tree-nom">{{ n3.nom }}</span>
+                                    <span class="tree-ref">{{ n3.codeReference }}</span>
+                                    <span class="tree-statut {{ statutNodeClass(n3.statutPolice) }}">{{ n3.statutPolice }}</span>
+                                    <span class="tree-date">{{ n3.dateInscription | date:'dd/MM/yyyy' }}</span>
+                                  </div>
+                                </li>
+                              }
+                            </ul>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Confirm delete -->
+  @if (confirmDeleteId() !== null) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3>Supprimer ce client ?</h3>
+        <p>Cette action est irréversible (soft delete).</p>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cancelDelete()" [disabled]="deleting()">Annuler</button>
+          <button class="btn-danger" (click)="confirmDelete()" [disabled]="deleting()">
+            @if (deleting()) { Suppression… } @else { Supprimer }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Résultat inscription -->
+  @if (inscriptionResult(); as r) {
+    <div class="modal-overlay">
+      <div class="modal-box result-box">
+        <div class="modal-icon success"><i class="fas fa-check"></i></div>
+        <h3>Client inscrit avec succès !</h3>
+        <div class="result-grid">
+          <div class="result-item"><span class="rl">Nom</span><span class="rv">{{ r.nom }}</span></div>
+          <div class="result-item"><span class="rl">Identifiant</span><span class="rv mono">{{ r.username }}</span></div>
+          <div class="result-item"><span class="rl">Mot de passe</span><span class="rv mono">{{ r.motDePasseDefaut }}</span></div>
+          <div class="result-item"><span class="rl">Code parrainage</span><span class="rv mono">{{ r.codeParrainage }}</span></div>
+          <div class="result-item"><span class="rl">Réf. client</span><span class="rv mono">{{ r.codeReference }}</span></div>
+          <div class="result-item"><span class="rl">Réf. police</span><span class="rv mono">{{ r.referencePolice }}</span></div>
+          <div class="result-item"><span class="rl">Statut police</span><span class="rv">{{ r.statutPolice }}</span></div>
+          <div class="result-item"><span class="rl">Immatriculation</span><span class="rv mono">{{ r.immatriculation }}</span></div>
+        </div>
+        <p class="result-note"><i class="fas fa-info-circle"></i> Communiquer l'identifiant et le mot de passe au client.</p>
+        <button class="btn-primary" (click)="closeResult()">Fermer</button>
+      </div>
+    </div>
+  }
+
+  <!-- Drawer inscription -->
+  @if (showForm()) {
+    <div class="drawer-overlay" (click)="closeForm()">
+      <aside class="drawer" (click)="$event.stopPropagation()">
+        <div class="drawer-header">
+          <h2><i class="fas fa-user-plus"></i> Inscrire un client</h2>
+          <button class="close-btn" (click)="closeForm()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drawer-body">
+          <form [formGroup]="form" (ngSubmit)="submit()">
+
+            <div class="form-section">
+              <h3 class="section-title"><i class="fas fa-user"></i> Informations client</h3>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Nom complet <span class="req">*</span></label>
+                  <input formControlName="nom" [class.invalid]="isInvalid('nom')" placeholder="Ex: Jean Kouadio">
+                  @if (isInvalid('nom')) { <span class="fe">Champ obligatoire</span> }
+                </div>
+                <div class="fg">
+                  <label>CNI / Passeport <span class="req">*</span></label>
+                  <input formControlName="cni" [class.invalid]="isInvalid('cni')" placeholder="Ex: CI-0123456789">
+                  @if (isInvalid('cni')) { <span class="fe">Champ obligatoire</span> }
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Téléphone <span class="req">*</span></label>
+                  <input formControlName="telephone" [class.invalid]="isInvalid('telephone')" placeholder="+22507XXXXXXXX">
+                  @if (isInvalid('telephone')) { <span class="fe">Format invalide</span> }
+                </div>
+                <div class="fg">
+                  <label>Email</label>
+                  <input formControlName="email" type="email" placeholder="email@exemple.ci">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Code parrain (optionnel)</label>
+                  <input formControlName="codeParrainParrain" placeholder="ASS-XXXX">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3 class="section-title"><i class="fas fa-car"></i> Véhicule</h3>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Immatriculation <span class="req">*</span></label>
+                  <input formControlName="immatriculation" [class.invalid]="isInvalid('immatriculation')" placeholder="AB 1234 CI">
+                  @if (isInvalid('immatriculation')) { <span class="fe">Champ obligatoire</span> }
+                </div>
+                <div class="fg">
+                  <label>Type de véhicule <span class="req">*</span></label>
+                  <select formControlName="typeVehicule">
+                    @for (t of typesVehicule; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Marque <span class="req">*</span></label>
+                  <input formControlName="marque" [class.invalid]="isInvalid('marque')" placeholder="Toyota">
+                  @if (isInvalid('marque')) { <span class="fe">Champ obligatoire</span> }
+                </div>
+                <div class="fg">
+                  <label>Modèle <span class="req">*</span></label>
+                  <input formControlName="modele" [class.invalid]="isInvalid('modele')" placeholder="Corolla">
+                  @if (isInvalid('modele')) { <span class="fe">Champ obligatoire</span> }
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Cylindrée (cm³)</label>
+                  <input formControlName="cylindre" type="number" min="1" placeholder="1600">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3 class="section-title"><i class="fas fa-file-alt"></i> Police d'assurance</h3>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Type de police <span class="req">*</span></label>
+                  <select formControlName="typePolice">
+                    @for (t of typesPolice; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+                  </select>
+                </div>
+                <div class="fg">
+                  <label>Prime (XOF) <span class="req">*</span></label>
+                  <input formControlName="prime" type="number" min="1" [class.invalid]="isInvalid('prime')" placeholder="50000">
+                  @if (isInvalid('prime')) { <span class="fe">Montant invalide</span> }
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Date d'effet <span class="req">*</span></label>
+                  <input formControlName="dateEffet" type="date" [class.invalid]="isInvalid('dateEffet')">
+                  @if (isInvalid('dateEffet')) { <span class="fe">Date requise</span> }
+                </div>
+                <div class="fg">
+                  <label>Date d'expiration <span class="req">*</span></label>
+                  <input formControlName="dateExpiration" type="date" [class.invalid]="isInvalid('dateExpiration')">
+                  @if (isInvalid('dateExpiration')) { <span class="fe">Date requise</span> }
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="fg">
+                  <label>Mode de paiement <span class="req">*</span></label>
+                  <select formControlName="modePaiement">
+                    @for (m of modesPaiement; track m.value) { <option [value]="m.value">{{ m.label }}</option> }
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            @if (saveError()) {
+              <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ saveError() }}</div>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeForm()" [disabled]="saving()">Annuler</button>
+              <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="spinner-sm"></span> Inscription… } @else { <i class="fas fa-check"></i> Inscrire }
+              </button>
+            </div>
+          </form>
+        </div>
+      </aside>
+    </div>
+  }
+</div>

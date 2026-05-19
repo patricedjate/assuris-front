@@ -1,0 +1,90 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Paiements</h1>
+      <p class="page-sub">{{ paiements().length }} paiement(s) enregistré(s)</p>
+    </div>
+    <button class="btn-primary" (click)="openForm()"><i class="fas fa-plus"></i> Nouveau paiement</button>
+  </div>
+
+  @if (error()) { <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+  } @else if (paiements().length === 0) {
+    <div class="empty"><i class="fas fa-credit-card"></i><p>Aucun paiement enregistré.</p></div>
+  } @else {
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Référence</th><th>Montant</th><th>Mode</th><th>Statut</th><th>Date</th><th>Police ID</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of paiements(); track p.id) {
+            <tr>
+              <td><span class="badge-ref">{{ p.reference }}</span></td>
+              <td class="fw-num">{{ p.montant | number }} XOF</td>
+              <td>{{ modeLabel(p.mode) }}</td>
+              <td><span [class]="'badge ' + statutClass(p.statut)">{{ p.statut }}</span></td>
+              <td>{{ p.date | date:'dd/MM/yyyy' }}</td>
+              <td>#{{ p.policeId }}</td>
+              <td>
+                @if (p.statut === 'EN_ATTENTE') {
+                  @if (validating() === p.id) {
+                    <span class="spinner-xs"></span>
+                  } @else {
+                    <button class="act-btn green" (click)="valider(p.id)" title="Valider"><i class="fas fa-check"></i> Valider</button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="drawer-overlay" (click)="closeForm()">
+      <aside class="drawer" (click)="$event.stopPropagation()">
+        <div class="drawer-header">
+          <h2><i class="fas fa-credit-card"></i> Nouveau paiement</h2>
+          <button class="close-btn" (click)="closeForm()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drawer-body">
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div class="fg">
+              <label>Police ID <span class="req">*</span></label>
+              <input formControlName="policeId" type="number" [class.invalid]="isInvalid('policeId')" placeholder="Ex: 12">
+              @if (isInvalid('policeId')) { <span class="fe">Champ obligatoire</span> }
+            </div>
+            <div class="fg">
+              <label>Montant (XOF) <span class="req">*</span></label>
+              <input formControlName="montant" type="number" min="1" [class.invalid]="isInvalid('montant')" placeholder="Ex: 50000">
+              @if (isInvalid('montant')) { <span class="fe">Montant invalide</span> }
+            </div>
+            <div class="fg">
+              <label>Mode de paiement <span class="req">*</span></label>
+              <select formControlName="mode">
+                @for (m of modes; track m.value) { <option [value]="m.value">{{ m.label }}</option> }
+              </select>
+            </div>
+            <div class="fg">
+              <label>URL de preuve (optionnel)</label>
+              <input formControlName="preuveUrl" placeholder="https://…">
+            </div>
+            @if (saveError()) { <div class="alert-error" style="margin-top:1rem"><i class="fas fa-exclamation-circle"></i> {{ saveError() }}</div> }
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeForm()" [disabled]="saving()">Annuler</button>
+              <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="spinner-sm"></span> Enregistrement… } @else { Enregistrer }
+              </button>
+            </div>
+          </form>
+        </div>
+      </aside>
+    </div>
+  }
+</div>

@@ -1,0 +1,27 @@
+.page { padding:0; }
+.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:2rem; }
+.page-title { font-size:1.5rem; font-weight:700; color:#0d3b6e; margin:0 0 0.2rem; }
+.page-sub { color:#64748b; font-size:0.875rem; margin:0; }
+.alert-error { display:flex; align-items:center; gap:0.75rem; padding:0.875rem 1rem; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; color:#dc2626; margin-bottom:1.5rem; font-size:0.875rem; }
+.rapports-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:1.5rem; }
+.rapport-card { background:#fff; border-radius:16px; padding:1.75rem; border:1px solid #e8ecf0; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+.rapport-icon { width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; margin-bottom:1rem; }
+.rapport-icon.blue   { background:#dbeafe; color:#2563eb; }
+.rapport-icon.purple { background:#ede9fe; color:#7c3aed; }
+.rapport-icon.green  { background:#d1fae5; color:#059669; }
+.rapport-card h3 { font-size:1rem; font-weight:700; color:#0d3b6e; margin:0 0 0.4rem; }
+.rapport-card p { font-size:0.82rem; color:#64748b; margin:0 0 1.25rem; line-height:1.5; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.875rem; }
+.fg { display:flex; flex-direction:column; gap:0.3rem; }
+.fg label { font-size:0.78rem; font-weight:600; color:#475569; }
+.fg select { padding:0.5rem 0.75rem; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.85rem; color:#1e293b; outline:none; cursor:pointer; }
+.fg select:focus { border-color:#1565c0; }
+.format-row { display:flex; gap:0.75rem; margin-bottom:1.25rem; }
+.radio-opt { display:flex; align-items:center; gap:0.4rem; padding:0.4rem 0.9rem; border:1.5px solid #e2e8f0; border-radius:20px; font-size:0.82rem; font-weight:600; color:#475569; cursor:pointer; transition:all 0.15s; }
+.radio-opt input { display:none; }
+.radio-opt.active { border-color:#1565c0; color:#1565c0; background:#eff6ff; }
+.btn-download { display:flex; align-items:center; justify-content:center; gap:0.5rem; width:100%; padding:0.65rem; background:#1565c0; color:#fff; border:none; border-radius:8px; font-size:0.875rem; font-weight:700; cursor:pointer; transition:background 0.15s; }
+.btn-download:hover:not(:disabled) { background:#0d3b6e; }
+.btn-download:disabled { opacity:0.6; cursor:not-allowed; }
+.spinner-sm { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }

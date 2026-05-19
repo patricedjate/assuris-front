@@ -1,0 +1,218 @@
+<div class="detail-page">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div class="header-left">
+      <a class="back-btn" routerLink="/admin-saas/tenants">
+        <i class="fas fa-arrow-left"></i> Tenants
+      </a>
+      @if (tenant(); as t) {
+        <div class="tenant-title">
+          <h1 class="page-title">{{ t.nomCompagnie }}</h1>
+          <span class="tenant-id-badge">{{ t.tenantId }}</span>
+        </div>
+      }
+    </div>
+    @if (!loading() && !error()) {
+      <button class="btn-danger-outline" (click)="askDelete()" [disabled]="actionLoading() !== null">
+        <i class="fas fa-trash"></i> Supprimer
+      </button>
+    }
+  </div>
+
+  <!-- État -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement…</p>
+    </div>
+  } @else if (error()) {
+    <div class="alert-error">
+      <i class="fas fa-exclamation-circle"></i> {{ error() }}
+    </div>
+  } @else if (tenant(); as t) {
+
+    <!-- Feedbacks actions -->
+    @if (actionSuccess()) {
+      <div class="alert-success">
+        <i class="fas fa-check-circle"></i> {{ actionSuccess() }}
+      </div>
+    }
+    @if (actionError()) {
+      <div class="alert-error">
+        <i class="fas fa-exclamation-circle"></i> {{ actionError() }}
+      </div>
+    }
+
+    <!-- Mini stats -->
+    <div class="stats-row">
+      <div class="mini-stat">
+        <span class="mini-icon clients"><i class="fas fa-users"></i></span>
+        <div class="mini-body">
+          <span class="mini-value">{{ t.nbClients }}</span>
+          <span class="mini-label">Clients</span>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-icon polices"><i class="fas fa-file-alt"></i></span>
+        <div class="mini-body">
+          <span class="mini-value">{{ t.nbPolices }}</span>
+          <span class="mini-label">Polices</span>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-icon users"><i class="fas fa-user-tie"></i></span>
+        <div class="mini-body">
+          <span class="mini-value">{{ t.nbUtilisateurs }}</span>
+          <span class="mini-label">Utilisateurs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grille principale -->
+    <div class="content-grid">
+
+      <!-- Carte Licence -->
+      <div class="section-card licence-card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-key"></i> Licence</h2>
+          <span class="licence-badge {{ licenceBadgeClass(t.licence.statut) }}">
+            <i class="fas {{ licenceIcon(t.licence.statut) }}"></i>
+            {{ licenceLabel(t.licence.statut) }}
+          </span>
+        </div>
+
+        <div class="licence-dates">
+          <div class="date-item">
+            <span class="date-label">Début</span>
+            <span class="date-value">{{ t.licence.dateDebut | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="date-arrow"><i class="fas fa-arrow-right"></i></div>
+          <div class="date-item">
+            <span class="date-label">Expiration</span>
+            <span class="date-value expiry">{{ t.licence.dateExpiration | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+
+        @if (t.licence.joursRestants > 0) {
+          <div class="days-block">
+            <div class="days-text">
+              <span class="days-number">{{ t.licence.joursRestants }}</span>
+              <span class="days-label">jours restants</span>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-fill {{ progressClass(t.licence.joursRestants) }}"
+                [style.width.%]="progressWidth(t.licence.joursRestants)">
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="days-expired">
+            <i class="fas fa-exclamation-triangle"></i>
+            Expirée depuis {{ t.licence.joursRestants * -1 }} jours
+          </div>
+        }
+
+        <div class="licence-actions">
+          @if (t.licence.statut === 'ACTIVE') {
+            <button class="btn-warning" (click)="suspendre()"
+                    [disabled]="actionLoading() !== null">
+              @if (actionLoading() === 'suspendre') {
+                <span class="spinner-sm"></span>
+              } @else {
+                <i class="fas fa-pause"></i>
+              }
+              Suspendre
+            </button>
+          }
+
+          @if (t.licence.statut === 'SUSPENDUE') {
+            <button class="btn-success" (click)="reactiver()"
+                    [disabled]="actionLoading() !== null">
+              @if (actionLoading() === 'reactiver') {
+                <span class="spinner-sm"></span>
+              } @else {
+                <i class="fas fa-play"></i>
+              }
+              Réactiver
+            </button>
+          }
+
+          @if (t.licence.statut !== 'ACTIVE' || t.licence.joursRestants < 90) {
+            <button class="btn-primary" (click)="renouveler()"
+                    [disabled]="actionLoading() !== null">
+              @if (actionLoading() === 'renouveler') {
+                <span class="spinner-sm"></span>
+              } @else {
+                <i class="fas fa-sync-alt"></i>
+              }
+              Renouveler (+1 an)
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Carte Informations -->
+      <div class="section-card info-card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-address-card"></i> Informations</h2>
+        </div>
+
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-icon"><i class="fas fa-fingerprint"></i></div>
+            <div class="info-body">
+              <span class="info-label">Tenant ID</span>
+              <span class="info-value mono">{{ t.tenantId }}</span>
+            </div>
+          </div>
+
+          @if (t.contactEmail) {
+            <div class="info-item">
+              <div class="info-icon"><i class="fas fa-envelope"></i></div>
+              <div class="info-body">
+                <span class="info-label">Email de contact</span>
+                <span class="info-value">{{ t.contactEmail }}</span>
+              </div>
+            </div>
+          }
+
+          <div class="info-item">
+            <div class="info-icon"><i class="fas fa-calendar-plus"></i></div>
+            <div class="info-body">
+              <span class="info-label">Créé le</span>
+              <span class="info-value">{{ t.createdAt | date:"dd/MM/yyyy 'à' HH:mm" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  }
+
+  <!-- Modal suppression -->
+  @if (showDeleteConfirm()) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3>Supprimer ce tenant ?</h3>
+        <p>
+          Cette action supprimera définitivement
+          <strong>{{ tenant()?.nomCompagnie }}</strong>
+          et toutes ses données. Cette opération est irréversible.
+        </p>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cancelDelete()"
+                  [disabled]="actionLoading() === 'delete'">Annuler</button>
+          <button class="btn-danger" (click)="confirmDelete()"
+                  [disabled]="actionLoading() === 'delete'">
+            @if (actionLoading() === 'delete') { Suppression… } @else { Supprimer définitivement }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

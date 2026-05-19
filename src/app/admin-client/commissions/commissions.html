@@ -1,0 +1,102 @@
+<div class="page-header">
+  <h4 class="page-title">Mes Commissions</h4>
+  <span class="page-subtitle">Historique de vos gains de parrainage</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6">
+    <div class="kpi-card">
+      <div class="kpi-icon green"><i class="fas fa-check-circle"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Total versé</span>
+        <span class="kpi-value">{{ total | number }} FCFA</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="kpi-card">
+      <div class="kpi-icon orange"><i class="fas fa-clock"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">En attente</span>
+        <span class="kpi-value">{{ enAttente | number }} FCFA</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sélecteur d'opérateur Mobile Money -->
+<div class="operateur-bar mb-3">
+  <span class="operateur-label"><i class="fas fa-mobile-alt me-1"></i>Opérateur Mobile Money :</span>
+  <div class="operateur-btns">
+    @for (op of operateurs; track op.value) {
+      <button class="op-btn" [class.active]="operateur() === op.value"
+              (click)="operateur.set(op.value)">{{ op.label }}</button>
+    }
+  </div>
+</div>
+
+@if (virementError()) {
+  <div class="alert-error mb-3">
+    <i class="fas fa-times-circle me-2"></i>{{ virementError() }}
+  </div>
+}
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="state-box"><span class="spinner-border text-primary"></span></div>
+  } @else if (commissions().length === 0) {
+    <div class="state-box">
+      <i class="fas fa-coins"></i>
+      <p>Aucune commission pour le moment.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Niveau</th><th>Période</th><th>Montant</th>
+            <th>Mode versement</th><th>Statut</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of commissions(); track c.id) {
+            <tr>
+              <td><span class="niveau-badge n{{ c.niveau }}">{{ niveauLabel(c.niveau) }}</span></td>
+              <td class="text-sm">
+                {{ c.debutPeriode | date:'dd/MM/yy' }} → {{ c.finPeriode | date:'dd/MM/yy' }}
+              </td>
+              <td class="fw-semibold">{{ c.montant | number }} FCFA</td>
+              <td>{{ c.modeVersement || '—' }}</td>
+              <td>
+                <span class="statut-badge {{ statutClass(c.statut) }}">{{ c.statut }}</span>
+                @if (virementSuccess() === c.id) {
+                  <span class="virement-ok ms-1"><i class="fas fa-check-circle"></i> Envoyée</span>
+                }
+              </td>
+              <td>
+                @if (c.statut === 'QUALIFIE') {
+                  <button class="btn-virement"
+                    (click)="demanderMobileMoney(c.id)"
+                    [disabled]="virementEnCours() === c.id">
+                    @if (virementEnCours() === c.id) {
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                    } @else {
+                      <i class="fas fa-mobile-alt me-1"></i>
+                    }
+                    {{ operateur() === 'MTN_MONEY' ? 'MTN' : operateur() === 'ORANGE_MONEY' ? 'Orange' : 'Wave' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="versement-note">
+      <i class="fas fa-info-circle me-2"></i>
+      Les commissions qualifiées sont versées via votre opérateur Mobile Money sélectionné ci-dessus.
+      Le versement est soumis à validation.
+    </div>
+  }
+</div>

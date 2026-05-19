@@ -1,0 +1,67 @@
+.loading-state { display:flex; justify-content:center; padding:4rem; }
+
+.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem; }
+.page-title { font-size:1.3rem; font-weight:700; color:#0d3b6e; margin:0; }
+.page-subtitle { font-size:0.83rem; color:#6c757d; }
+
+.police-badge { padding:0.3rem 0.85rem; border-radius:20px; font-size:0.75rem; font-weight:700; letter-spacing:0.5px; }
+.badge-success { background:#e8f5e9; color:#2e7d32; }
+.badge-warning { background:#fff8e1; color:#f57c00; }
+.badge-danger  { background:#fdecea; color:#c62828; }
+.badge-secondary { background:#f1f5f9; color:#6c757d; }
+
+.kpi-card { background:#fff; border-radius:12px; padding:1.1rem; display:flex; align-items:center; gap:0.9rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.kpi-icon { width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.15rem; flex-shrink:0; }
+.kpi-icon.blue { background:#1565c0; }
+.kpi-icon.orange { background:#f57c00; }
+.kpi-icon.green { background:#2e7d32; }
+.kpi-icon.purple { background:#6a1b9a; }
+.kpi-body { display:flex; flex-direction:column; }
+.kpi-label { font-size:0.72rem; color:#6c757d; text-transform:uppercase; letter-spacing:0.5px; }
+.kpi-value { font-size:1.25rem; font-weight:700; color:#1e293b; }
+.qualif-badge { display:inline-block; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.72rem; font-weight:700; }
+
+.info-card { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden; }
+.info-card-header { padding:0.9rem 1.1rem; font-size:0.8rem; font-weight:700; color:#0d3b6e; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #f1f5f9; }
+.info-card-body { padding:1rem 1.1rem; display:flex; flex-direction:column; gap:0.6rem; }
+.info-row { display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; }
+.info-label { color:#6c757d; font-size:0.8rem; }
+.badge-ref { background:#e8f0fe; color:#1565c0; padding:0.15rem 0.5rem; border-radius:5px; font-size:0.78rem; font-weight:600; font-family:monospace; }
+
+.reseau-row { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem; }
+.reseau-level { width:28px; height:22px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; flex-shrink:0; }
+.reseau-level.n1 { background:#e8f0fe; color:#1565c0; }
+.reseau-level.n2 { background:#e8f5e9; color:#2e7d32; }
+.reseau-level.n3 { background:#fff8e1; color:#f57c00; }
+.reseau-bar-wrap { flex:1; height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden; }
+.reseau-bar { height:100%; background:#1565c0; border-radius:3px; transition:width 0.4s; }
+.reseau-stat { font-size:0.75rem; color:#6c757d; white-space:nowrap; }
+.code-parrain-box { margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #f1f5f9; display:flex; flex-direction:column; gap:0.5rem; }
+.code-parrain-row { display:flex; justify-content:space-between; align-items:center; }
+.code-parrain { font-family:monospace; font-weight:700; font-size:0.95rem; color:#1565c0; background:#e8f0fe; padding:0.2rem 0.6rem; border-radius:6px; }
+.share-actions { display:flex; gap:0.4rem; }
+.share-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; border:none; cursor:pointer; font-size:0.9rem; transition:all 0.15s; text-decoration:none; }
+.share-btn.copy { background:#f1f5f9; color:#374151; }
+.share-btn.copy:hover { background:#e8f0fe; color:#1565c0; }
+.share-btn.whatsapp { background:#e8f5e9; color:#2e7d32; }
+.share-btn.whatsapp:hover { background:#2e7d32; color:#fff; }
+.share-btn.sms { background:#fff8e1; color:#f57c00; }
+.share-btn.sms:hover { background:#f57c00; color:#fff; }
+.copie-confirm { font-size:0.72rem; color:#2e7d32; font-weight:600; text-align:right; }
+
+.validite-wrap { margin-top:0.6rem; }
+.validite-bar-bg { height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden; margin-bottom:0.3rem; }
+.validite-bar-fill { height:100%; border-radius:3px; transition:width 0.4s; }
+.validite-label { font-size:0.75rem; }
+
+.mini-table { margin:0; font-size:0.82rem; }
+.mini-table thead th { background:#f8fafc; color:#6c757d; font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; padding:0.6rem 1rem; border-bottom:1px solid #e8ecf0; }
+.mini-table tbody td { padding:0.6rem 1rem; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+.mini-table tbody tr:last-child td { border-bottom:none; }
+.text-mono { font-family:monospace; }
+
+.statut-badge { display:inline-block; padding:0.2rem 0.5rem; border-radius:5px; font-size:0.7rem; font-weight:700; }
+.statut-OUVERT { background:#fff8e1; color:#f57c00; }
+.statut-ACCEPTE,.statut-REGLE { background:#e8f5e9; color:#2e7d32; }
+.statut-REJETE { background:#fdecea; color:#c62828; }
+.statut-EN_INSTRUCTION,.statut-COMPLET { background:#e8f0fe; color:#1565c0; }

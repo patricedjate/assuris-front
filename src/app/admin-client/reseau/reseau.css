@@ -1,0 +1,39 @@
+.loading-state { display:flex; justify-content:center; padding:4rem; }
+.page-header { margin-bottom:1.25rem; }
+.page-title { font-size:1.3rem; font-weight:700; color:#0d3b6e; margin:0; }
+.page-subtitle { font-size:0.83rem; color:#6c757d; }
+.qualif-banner { display:flex; align-items:center; gap:1rem; background:#fff; border-radius:12px; padding:1.1rem 1.25rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); border-left:4px solid #adb5bd; margin-bottom:0.5rem; }
+.qualif-banner.qualif-ok { border-left-color:#2e7d32; }
+.qualif-icon { width:42px; height:42px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#6c757d; flex-shrink:0; }
+.qualif-banner.qualif-ok .qualif-icon { background:#e8f5e9; color:#2e7d32; }
+.qualif-banner strong { display:block; font-size:0.9rem; color:#1e293b; }
+.qualif-banner span { font-size:0.82rem; color:#6c757d; }
+.niveau-card { background:#fff; border-radius:12px; padding:1.25rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.niveau-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.niveau-label { font-size:1rem; font-weight:700; color:#0d3b6e; }
+.taux-badge { font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:20px; }
+.n1 .taux-badge { background:#e8f0fe; color:#1565c0; }
+.n2 .taux-badge { background:#e8f5e9; color:#2e7d32; }
+.n3 .taux-badge { background:#fff8e1; color:#f57c00; }
+.niveau-stats { display:flex; align-items:center; gap:0; }
+.stat { flex:1; text-align:center; }
+.stat-value { display:block; font-size:1.75rem; font-weight:700; color:#1e293b; }
+.stat-label { font-size:0.72rem; color:#6c757d; text-transform:uppercase; letter-spacing:0.5px; }
+.stat-divider { width:1px; height:40px; background:#e8ecf0; }
+.progress-wrap { margin-top:1rem; }
+.progress-bar-bg { height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden; margin-bottom:0.3rem; }
+.progress-bar-fill { height:100%; background:#1565c0; border-radius:3px; transition:width 0.4s; }
+.progress-label { font-size:0.72rem; color:#6c757d; }
+
+.toggle-filleuls { display:flex; align-items:center; gap:0.4rem; width:100%; margin-top:0.85rem; padding:0.4rem 0.5rem; background:#f8fafc; border:1px solid #e8ecf0; border-radius:6px; font-size:0.76rem; font-weight:600; color:#374151; cursor:pointer; transition:background 0.15s; }
+.toggle-filleuls:hover { background:#f1f5f9; }
+.filleuls-list { list-style:none; padding:0; margin:0.5rem 0 0; display:flex; flex-direction:column; gap:0.4rem; }
+.filleul-item { padding:0.55rem 0.65rem; background:#f8fafc; border-radius:8px; border-left:3px solid #e8ecf0; }
+.filleul-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.2rem; }
+.filleul-nom { font-size:0.82rem; font-weight:600; color:#1e293b; }
+.filleul-meta { display:flex; gap:0.6rem; flex-wrap:wrap; font-size:0.7rem; color:#9ca3af; }
+.filleul-statut { font-size:0.68rem; font-weight:700; padding:0.15rem 0.45rem; border-radius:4px; }
+.sf-actif   { background:#e8f5e9; color:#2e7d32; }
+.sf-attente { background:#fff8e1; color:#f57c00; }
+.sf-expire  { background:#fdecea; color:#c62828; }
+.sf-autre   { background:#f1f5f9; color:#6c757d; }

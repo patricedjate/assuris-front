@@ -1,0 +1,82 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Polices</h1>
+      <p class="page-sub">{{ data()?.totalElements ?? 0 }} police(s) au total</p>
+    </div>
+  </div>
+
+  @if (error()) { <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+  } @else if (data()?.contenu?.length === 0) {
+    <div class="empty"><i class="fas fa-file-alt"></i><p>Aucune police trouvée.</p></div>
+  } @else {
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Référence</th><th>Type</th><th>Prime</th><th>Statut</th>
+            <th>Effet</th><th>Expiration</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of data()?.contenu ?? []; track p.id) {
+            <tr>
+              <td><span class="badge-ref">{{ p.reference }}</span></td>
+              <td>{{ p.typePolice }}</td>
+              <td class="fw-num">{{ p.prime | number }} XOF</td>
+              <td><span [class]="'badge ' + statutClass(p.statut)">{{ p.statut }}</span></td>
+              <td>{{ p.dateEffet | date:'dd/MM/yyyy' }}</td>
+              <td>{{ p.dateExpiration | date:'dd/MM/yyyy' }}</td>
+              <td class="actions-cell">
+                @if (actionLoading() === p.id) {
+                  <span class="spinner-xs"></span>
+                } @else {
+                  @if (p.statut === 'EN_ATTENTE') {
+                    <button class="act-btn green" (click)="activer(p.id)" title="Activer"><i class="fas fa-play"></i></button>
+                  }
+                  @if (p.statut === 'ACTIF') {
+                    <button class="act-btn orange" (click)="suspendre(p.id)" title="Suspendre"><i class="fas fa-pause"></i></button>
+                    <button class="act-btn red" (click)="resilier(p.id)" title="Résilier"><i class="fas fa-ban"></i></button>
+                    <button class="act-btn blue" (click)="openRenew(p.id)" title="Renouveler"><i class="fas fa-sync"></i></button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if ((data()?.totalPages ?? 0) > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="data()?.premiere" (click)="goPage(page() - 1)"><i class="fas fa-chevron-left"></i></button>
+        @for (pg of pages; track pg) {
+          <button class="page-btn" [class.active]="pg === page()" (click)="goPage(pg)">{{ pg + 1 }}</button>
+        }
+        <button class="page-btn" [disabled]="data()?.derniere" (click)="goPage(page() + 1)"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    }
+  }
+
+  <!-- Modal renouvellement -->
+  @if (showRenewForm() !== null) {
+    <div class="modal-overlay" (click)="showRenewForm.set(null)">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <h3><i class="fas fa-sync"></i> Renouveler la police</h3>
+        <form [formGroup]="renewForm" (ngSubmit)="submitRenew()">
+          <div class="fg" style="margin:1rem 0">
+            <label>Nouvelle date d'expiration</label>
+            <input formControlName="nouvelleExpiration" type="date">
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="showRenewForm.set(null)">Annuler</button>
+            <button type="submit" class="btn-primary" [disabled]="renewForm.invalid">Renouveler</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

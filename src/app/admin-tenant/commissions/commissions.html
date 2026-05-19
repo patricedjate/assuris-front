@@ -1,0 +1,63 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Commissions</h1>
+      <p class="page-sub">{{ data()?.totalElements ?? 0 }} commission(s) au total</p>
+    </div>
+    <button class="btn-primary" (click)="calculer()" [disabled]="calculating()">
+      @if (calculating()) { <span class="spinner-sm"></span> Calcul en cours… }
+      @else { <i class="fas fa-calculator"></i> Calculer commissions }
+    </button>
+  </div>
+
+  @if (calcResult()) {
+    <div class="alert-info"><i class="fas fa-info-circle"></i> {{ calcResult() }}</div>
+  }
+  @if (error()) { <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+  } @else if (data()?.contenu?.length === 0) {
+    <div class="empty"><i class="fas fa-percentage"></i><p>Aucune commission. Lancez un calcul trimestriel.</p></div>
+  } @else {
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Client ID</th><th>Niveau</th><th>Période</th><th>Montant</th><th>Statut</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of data()?.contenu ?? []; track c.id) {
+            <tr>
+              <td>#{{ c.clientId }}</td>
+              <td><span class="niveau-badge">{{ niveauLabel(c.niveau) }}</span></td>
+              <td class="text-sm">{{ c.debutPeriode | date:'dd/MM/yy' }} → {{ c.finPeriode | date:'dd/MM/yy' }}</td>
+              <td class="fw-num">{{ c.montant | number }} XOF</td>
+              <td><span [class]="'badge ' + statutClass(c.statut)">{{ c.statut }}</span></td>
+              <td>
+                @if (c.statut === 'EN_ATTENTE') {
+                  @if (versing() === c.id) {
+                    <span class="spinner-xs"></span>
+                  } @else {
+                    <button class="act-btn purple" (click)="verser(c.id)"><i class="fas fa-paper-plane"></i> Verser</button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if ((data()?.totalPages ?? 0) > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="data()?.premiere" (click)="goPage(page() - 1)"><i class="fas fa-chevron-left"></i></button>
+        @for (pg of pages; track pg) {
+          <button class="page-btn" [class.active]="pg === page()" (click)="goPage(pg)">{{ pg + 1 }}</button>
+        }
+        <button class="page-btn" [disabled]="data()?.derniere" (click)="goPage(page() + 1)"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    }
+  }
+</div>

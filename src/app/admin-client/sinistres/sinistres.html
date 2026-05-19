@@ -1,0 +1,49 @@
+<div class="page-header">
+  <div>
+    <h4 class="page-title">Mes Sinistres</h4>
+    <span class="page-subtitle">{{ sinistres().length }} déclaration(s)</span>
+  </div>
+  <button class="btn btn-primary" (click)="showDeclarer.set(true)">
+    <i class="fas fa-plus me-2"></i>Déclarer un sinistre
+  </button>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="state-box"><span class="spinner-border text-primary"></span></div>
+  } @else if (sinistres().length === 0) {
+    <div class="state-box">
+      <i class="fas fa-car-crash"></i>
+      <p>Aucun sinistre déclaré.</p>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr><th>Référence</th><th>Date sinistre</th><th>Lieu</th><th>Blessés</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+          @for (s of sinistres(); track s.id) {
+            <tr>
+              <td class="text-mono">{{ s.reference }}</td>
+              <td>{{ s.dateSinistre | date:'dd/MM/yyyy' }}</td>
+              <td>{{ s.lieu }}</td>
+              <td>
+                @if (s.avecBlesses) {
+                  <span class="yes-badge"><i class="fas fa-exclamation-triangle me-1"></i>Oui</span>
+                } @else {
+                  <span class="no-badge">Non</span>
+                }
+              </td>
+              <td><span class="statut-badge {{ statutClass(s.statut) }}">{{ s.statut }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (showDeclarer()) {
+  <app-declarer-modal (closed)="onDeclarerClosed($event)" />
+}

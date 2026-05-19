@@ -1,0 +1,112 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Configuration du tenant</h1>
+      <p class="page-sub">Identité de la compagnie, contacts et tarifs CIMA</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><p>Chargement de la configuration…</p></div>
+  } @else {
+    @if (success()) { <div class="alert-success"><i class="fas fa-check-circle"></i> {{ success() }}</div> }
+    @if (error())   { <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div> }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="config-card">
+        <h3 class="card-title"><i class="fas fa-building"></i> Identité de la compagnie</h3>
+        <div class="form-row">
+          <div class="fg">
+            <label>Nom de la compagnie <span class="req">*</span></label>
+            <input formControlName="nomCompagnie" placeholder="Ex: Assurancia Côte d'Ivoire" [class.invalid]="isInvalid('nomCompagnie')">
+            @if (isInvalid('nomCompagnie')) { <span class="fe">Champ obligatoire</span> }
+          </div>
+          <div class="fg">
+            <label>URL du logo</label>
+            <input formControlName="logoUrl" placeholder="https://…/logo.png">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="fg">
+            <label>Couleur principale</label>
+            <div class="color-row">
+              <input formControlName="couleurPrimaire" type="color" class="color-picker">
+              <input formControlName="couleurPrimaire" placeholder="#1565c0" class="color-text">
+            </div>
+          </div>
+          <div class="fg">
+            <label>Site web</label>
+            <input formControlName="siteWeb" placeholder="https://compagnie.ci">
+          </div>
+        </div>
+      </div>
+
+      <div class="config-card">
+        <h3 class="card-title"><i class="fas fa-address-card"></i> Contacts</h3>
+        <div class="form-row">
+          <div class="fg">
+            <label>Téléphone</label>
+            <input formControlName="contactTelephone" placeholder="+225 XX XX XX XX XX">
+          </div>
+          <div class="fg">
+            <label>Email</label>
+            <input formControlName="contactEmail" type="email" placeholder="contact@compagnie.ci" [class.invalid]="isInvalid('contactEmail')">
+            @if (isInvalid('contactEmail')) { <span class="fe">Email invalide</span> }
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="fg" style="grid-column:1/-1">
+            <label>Adresse</label>
+            <input formControlName="adresse" placeholder="Abidjan, Plateau, …">
+          </div>
+        </div>
+      </div>
+
+      <div class="config-card">
+        <div class="card-header-row">
+          <h3 class="card-title"><i class="fas fa-table"></i> Paramètres tarifaires CIMA</h3>
+          <button type="button" class="btn-add" (click)="addTarif()"><i class="fas fa-plus"></i> Ajouter</button>
+        </div>
+
+        <div formArrayName="parametresTarifaires">
+          @for (tarif of tarifs.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="tarif-row">
+              <div class="tf">
+                <label>Type véhicule</label>
+                <select formControlName="typeVehicule">
+                  @for (tv of typesVehicule; track tv.value) { <option [value]="tv.value">{{ tv.label }}</option> }
+                </select>
+              </div>
+              <div class="tf">
+                <label>Type police</label>
+                <select formControlName="typePolice">
+                  @for (tp of typesPolice; track tp.value) { <option [value]="tp.value">{{ tp.label }}</option> }
+                </select>
+              </div>
+              <div class="tf">
+                <label>Prime min (XOF)</label>
+                <input formControlName="primeMin" type="number" min="1" [class.invalid]="isTarifInvalid(i,'primeMin')">
+              </div>
+              <div class="tf">
+                <label>Prime max (XOF)</label>
+                <input formControlName="primeMax" type="number" min="1" [class.invalid]="isTarifInvalid(i,'primeMax')">
+              </div>
+              <button type="button" class="btn-remove" (click)="removeTarif(i)" [disabled]="tarifs.length <= 1" title="Supprimer">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-save" [disabled]="saving()">
+          @if (saving()) { <span class="spinner-sm"></span> Sauvegarde… }
+          @else { <i class="fas fa-save"></i> Sauvegarder la configuration }
+        </button>
+      </div>
+
+    </form>
+  }
+</div>

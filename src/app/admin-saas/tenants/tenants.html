@@ -1,0 +1,254 @@
+<div class="tenants-page">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Gestion des Tenants</h1>
+      <p class="page-subtitle">Compagnies d'assurance partenaires de la plateforme</p>
+    </div>
+    <button class="btn-primary" (click)="openForm()">
+      <i class="fas fa-plus"></i> Nouveau tenant
+    </button>
+  </div>
+
+  <!-- Erreur chargement -->
+  @if (error()) {
+    <div class="alert-error">
+      <i class="fas fa-exclamation-circle"></i> {{ error() }}
+    </div>
+  }
+
+  <!-- Tableau -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement des tenants…</p>
+    </div>
+  } @else {
+    @if (tenants().length === 0) {
+      <div class="empty-state">
+        <i class="fas fa-building"></i>
+        <p>Aucun tenant enregistré. Créez le premier !</p>
+      </div>
+    } @else {
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tenant ID</th>
+              <th>Compagnie</th>
+              <th>Date création</th>
+              <th class="text-right">Clients</th>
+              <th class="text-right">Polices</th>
+              <th>Licence</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of tenants(); track t.tenantId) {
+              <tr>
+                <td><span class="badge-id">{{ t.tenantId }}</span></td>
+                <td class="company-name">{{ t.nomCompagnie }}</td>
+                <td>{{ t.createdAt | date:'dd/MM/yyyy' }}</td>
+                <td class="text-right">{{ t.nbClients | number }}</td>
+                <td class="text-right">{{ t.nbPolices | number }}</td>
+                <td>
+                  <span class="licence-badge {{ licenceBadgeClass(t.licence.statut) }}">
+                    {{ licenceLabel(t.licence.statut) }}
+                  </span>
+                </td>
+                <td class="actions">
+                  <a class="btn-manage-sm" [routerLink]="[t.tenantId]" title="Gérer ce tenant">
+                    <i class="fas fa-cog"></i> Gérer
+                  </a>
+                  <button class="btn-danger-sm" (click)="askDelete(t.tenantId)" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- Modal confirmation suppression -->
+  @if (confirmDeleteId()) {
+    <div class="modal-overlay" (click)="cancelDelete()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3>Supprimer le tenant ?</h3>
+        <p>
+          Cette action supprimera définitivement le tenant
+          <strong>{{ confirmDeleteId() }}</strong> et toutes ses données.
+          Impossible d'annuler.
+        </p>
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cancelDelete()" [disabled]="deleting()">Annuler</button>
+          <button class="btn-danger" (click)="confirmDelete()" [disabled]="deleting()">
+            @if (deleting()) { Suppression… } @else { Supprimer }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Panneau de provisioning -->
+  @if (showForm()) {
+    <div class="drawer-overlay" (click)="closeForm()">
+      <aside class="drawer" (click)="$event.stopPropagation()">
+
+        <div class="drawer-header">
+          <h2>Nouveau tenant</h2>
+          <button class="close-btn" (click)="closeForm()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="drawer-body">
+          <form [formGroup]="form" (ngSubmit)="submit()">
+
+            <!-- Identifiant & Accès -->
+            <div class="form-section">
+              <h3 class="section-title"><i class="fas fa-fingerprint"></i> Identifiant & Accès admin</h3>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tenant ID <span class="req">*</span></label>
+                  <input formControlName="tenantId" placeholder="ex: assurancia-ci" [class.invalid]="isInvalid('tenantId')">
+                  @if (isInvalid('tenantId')) {
+                    <span class="field-error">3-30 caractères, minuscules, chiffres, tirets uniquement</span>
+                  }
+                </div>
+                <div class="form-group">
+                  <label>Nom de la compagnie <span class="req">*</span></label>
+                  <input formControlName="nomCompagnie" placeholder="ex: Assurancia Côte d'Ivoire" [class.invalid]="isInvalid('nomCompagnie')">
+                  @if (isInvalid('nomCompagnie')) {
+                    <span class="field-error">Champ obligatoire</span>
+                  }
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Email admin <span class="req">*</span></label>
+                  <input formControlName="adminUsername" type="email" placeholder="admin@compagnie.ci" [class.invalid]="isInvalid('adminUsername')">
+                  @if (isInvalid('adminUsername')) {
+                    <span class="field-error">Adresse email valide requise</span>
+                  }
+                </div>
+                <div class="form-group">
+                  <label>Mot de passe admin <span class="req">*</span></label>
+                  <input formControlName="adminPassword" type="password" placeholder="8 caractères minimum" [class.invalid]="isInvalid('adminPassword')">
+                  @if (isInvalid('adminPassword')) {
+                    <span class="field-error">8 caractères minimum</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="form-section">
+              <h3 class="section-title"><i class="fas fa-address-card"></i> Informations de contact</h3>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Téléphone</label>
+                  <input formControlName="contactTelephone" placeholder="+225 XX XX XX XX XX">
+                </div>
+                <div class="form-group">
+                  <label>Email contact</label>
+                  <input formControlName="contactEmail" type="email" placeholder="contact@compagnie.ci" [class.invalid]="isInvalid('contactEmail')">
+                  @if (isInvalid('contactEmail')) {
+                    <span class="field-error">Adresse email invalide</span>
+                  }
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Adresse</label>
+                  <input formControlName="adresse" placeholder="Abidjan, Plateau…">
+                </div>
+                <div class="form-group">
+                  <label>Site web</label>
+                  <input formControlName="siteWeb" placeholder="https://compagnie.ci">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group full-width">
+                  <label>Couleur principale</label>
+                  <div class="color-input-row">
+                    <input formControlName="couleurPrimaire" type="color" class="color-picker">
+                    <input formControlName="couleurPrimaire" placeholder="#1565c0" class="color-text">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarifs CIMA -->
+            <div class="form-section">
+              <div class="section-header-row">
+                <h3 class="section-title"><i class="fas fa-table"></i> Paramètres tarifaires CIMA</h3>
+                <button type="button" class="btn-add-tarif" (click)="addTarif()">
+                  <i class="fas fa-plus"></i> Ajouter
+                </button>
+              </div>
+              <p class="section-hint">Optionnel — les tarifs CIMA standards s'appliquent si absent.</p>
+
+              <div formArrayName="parametresTarifaires">
+                @for (tarif of tarifs.controls; track $index; let i = $index) {
+                  <div [formGroupName]="i" class="tarif-row">
+                    <div class="tarif-field">
+                      <label>Type véhicule</label>
+                      <select formControlName="typeVehicule">
+                        @for (tv of typesVehicule; track tv.value) {
+                          <option [value]="tv.value">{{ tv.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="tarif-field">
+                      <label>Type police</label>
+                      <select formControlName="typePolice">
+                        @for (tp of typesPolice; track tp.value) {
+                          <option [value]="tp.value">{{ tp.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="tarif-field">
+                      <label>Prime min (XOF)</label>
+                      <input formControlName="primeMin" type="number" min="1" [class.invalid]="isTarifInvalid(i, 'primeMin')">
+                    </div>
+                    <div class="tarif-field">
+                      <label>Prime max (XOF)</label>
+                      <input formControlName="primeMax" type="number" min="1" [class.invalid]="isTarifInvalid(i, 'primeMax')">
+                    </div>
+                    <button type="button" class="btn-remove-tarif" (click)="removeTarif(i)"
+                            [disabled]="tarifs.length <= 1" title="Supprimer">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            @if (saveError()) {
+              <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ saveError() }}</div>
+            }
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="closeForm()" [disabled]="saving()">Annuler</button>
+              <button type="submit" class="btn-primary" [disabled]="saving()">
+                @if (saving()) { <span class="spinner-sm"></span> Provisioning… }
+                @else { <i class="fas fa-check"></i> Provisionner }
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+      </aside>
+    </div>
+  }
+
+</div>

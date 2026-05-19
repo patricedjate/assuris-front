@@ -1,0 +1,150 @@
+<div class="page-header">
+  <h4 class="page-title">Ma Police</h4>
+  <span class="page-subtitle">Détails de votre assurance active</span>
+</div>
+
+@if (loading()) {
+  <div class="loading-state"><span class="spinner-border text-primary"></span></div>
+} @else if (!police()) {
+  <div class="empty-state">
+    <i class="fas fa-file-contract"></i>
+    <p>Aucune police active trouvée.</p>
+  </div>
+} @else {
+  @if (needsPayment) {
+    <div class="renewal-alert">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      @if (effectiveStatut === 'EXPIRE') {
+        Votre police est <strong>expirée</strong>. Effectuez un paiement ci-dessous pour la renouveler.
+      } @else {
+        Votre police est en <strong>attente de paiement</strong>. Réglez votre prime pour l'activer.
+      }
+    </div>
+  }
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="detail-card">
+        <div class="detail-header">
+          <span class="police-ref">{{ police()!.reference }}</span>
+          <span class="statut-badge {{ statutClass }}">{{ effectiveStatut }}</span>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Type de police</span>
+            <span class="detail-value">{{ police()!.typePolice }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Prime annuelle</span>
+            <span class="detail-value fw-bold">{{ police()!.prime | number }} FCFA</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date d'effet</span>
+            <span class="detail-value">{{ police()!.dateEffet | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date d'expiration</span>
+            <span class="detail-value">{{ police()!.dateExpiration | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="download-card">
+        <div class="download-card-title"><i class="fas fa-file-pdf me-2"></i>Documents officiels</div>
+        <button class="download-btn" (click)="downloadAttestation()" [disabled]="downloadingAttestation()">
+          @if (downloadingAttestation()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          @else { <i class="fas fa-download me-2"></i> }
+          Attestation d'assurance CIMA
+        </button>
+        <button class="download-btn green" (click)="downloadCarteVerte()" [disabled]="downloadingCarteVerte()">
+          @if (downloadingCarteVerte()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+          @else { <i class="fas fa-download me-2"></i> }
+          Carte verte internationale
+        </button>
+        @if (police()!.statut === 'ACTIF') {
+          <button class="download-btn orange" (click)="downloadRecu()" [disabled]="downloadingRecu()">
+            @if (downloadingRecu()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            @else { <i class="fas fa-receipt me-2"></i> }
+            Reçu de paiement de prime
+          </button>
+          <hr class="download-sep">
+          @if (renewalSuccess()) {
+            <div class="renewal-ok"><i class="fas fa-check-circle me-2"></i>Demande de renouvellement envoyée. Réglez votre prime ci-dessous.</div>
+          } @else {
+            <button class="download-btn renewal" (click)="demanderRenouvellement()" [disabled]="renewalLoading()">
+              @if (renewalLoading()) { <span class="spinner-border spinner-border-sm me-2"></span> }
+              @else { <i class="fas fa-sync-alt me-2"></i> }
+              Demander le renouvellement
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (needsPayment) {
+    <div class="payment-card mt-3" [formGroup]="payForm">
+      <div class="payment-card-title">
+        <i class="fas fa-credit-card me-2"></i>
+        @if (effectiveStatut === 'EXPIRE') { Renouveler ma police } @else { Activer ma police }
+      </div>
+
+      @if (paySuccess()) {
+        <div class="pay-success">
+          <i class="fas fa-check-circle me-2"></i>
+          Paiement soumis avec succès. Il sera validé par votre assureur.
+        </div>
+      } @else {
+        <div class="pay-amount-row">
+          <span class="pay-label">Montant à payer</span>
+          <span class="pay-amount">{{ police()!.prime | number }} FCFA</span>
+        </div>
+
+        <div class="pay-field">
+          <label class="pay-field-label">Formule d'assurance</label>
+          <select class="pay-select" formControlName="typePolice">
+            @for (t of typesPolice; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+          @if (payForm.value.typePolice !== police()!.typePolice) {
+            <span class="pay-change-note">
+              <i class="fas fa-info-circle me-1"></i>
+              Changement de formule :
+              {{ policeTypeLabel(police()!.typePolice) }} → {{ policeTypeLabel(payForm.value.typePolice ?? '') }}
+            </span>
+          }
+        </div>
+
+        <div class="pay-field">
+          <label class="pay-field-label">Mode de paiement</label>
+          <select class="pay-select" formControlName="mode">
+            @for (m of modesPaiement; track m.value) {
+              <option [value]="m.value">{{ m.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="pay-field">
+          <label class="pay-field-label">Référence / preuve (optionnel)</label>
+          <input class="pay-input" type="text" formControlName="preuveUrl"
+                 placeholder="Ex: numéro de transaction, lien reçu…" />
+        </div>
+
+        @if (payError()) {
+          <div class="pay-error"><i class="fas fa-times-circle me-1"></i>{{ payError() }}</div>
+        }
+
+        <button class="pay-btn" (click)="submitPaiement()" [disabled]="paying()">
+          @if (paying()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>Traitement…
+          } @else {
+            <i class="fas fa-paper-plane me-2"></i>Soumettre le paiement
+          }
+        </button>
+      }
+    </div>
+  }
+}

@@ -1,0 +1,162 @@
+<div class="modal-overlay" (click)="close()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <div>
+        <h5 class="modal-title">Déclarer un sinistre</h5>
+        <p class="modal-subtitle">
+          @if (step() === 1) { Étape 1 / 3 — Localisation de l'accident }
+          @else if (step() === 2) { Étape 2 / 3 — Description }
+          @else { Étape 3 / 3 — Documents justificatifs }
+        </p>
+      </div>
+      <button class="close-btn" (click)="close()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="steps-bar">
+      <div class="step-fill" [style.width.%]="step() === 1 ? 33 : step() === 2 ? 66 : 100"></div>
+    </div>
+
+    <div class="modal-body">
+      @if (errorMessage()) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+          <i class="fas fa-exclamation-circle"></i>{{ errorMessage() }}
+        </div>
+      }
+
+      <!-- ÉTAPE 1 -->
+      @if (step() === 1) {
+        <form [formGroup]="step1">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Date du sinistre *</label>
+              <input type="date" class="form-control" formControlName="dateSinistre"
+                [class.is-invalid]="isInvalid1('dateSinistre')">
+              @if (isInvalid1('dateSinistre')) {
+                <div class="invalid-feedback">Date obligatoire.</div>
+              }
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Heure du sinistre *</label>
+              <input type="time" class="form-control" formControlName="heureSinistre"
+                [class.is-invalid]="isInvalid1('heureSinistre')">
+              @if (isInvalid1('heureSinistre')) {
+                <div class="invalid-feedback">Heure obligatoire.</div>
+              }
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Lieu exact *</label>
+              <input type="text" class="form-control" formControlName="lieu"
+                [class.is-invalid]="isInvalid1('lieu')" placeholder="Ex: Carrefour Adjamé">
+              @if (isInvalid1('lieu')) {
+                <div class="invalid-feedback">Lieu obligatoire.</div>
+              }
+            </div>
+          </div>
+
+          @if (cimaError()) {
+            <div class="cima-error mt-3">
+              <i class="fas fa-ban me-2"></i>
+              <div>
+                <strong>Déclaration bloquée</strong>
+                <p class="mb-0">{{ cimaError() }}</p>
+              </div>
+            </div>
+          }
+
+          <div class="delai-info mt-3">
+            <i class="fas fa-info-circle me-2"></i>
+            <span>Article 12 CIMA : la déclaration doit intervenir dans les <strong>5 jours ouvrables</strong> suivant l'accident.</span>
+          </div>
+        </form>
+      }
+
+      <!-- ÉTAPE 2 -->
+      @if (step() === 2) {
+        <form [formGroup]="step2">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Description des faits *</label>
+              <textarea class="form-control" formControlName="description" rows="5"
+                [class.is-invalid]="isInvalid2('description')"
+                placeholder="Décrivez précisément les circonstances de l'accident…"></textarea>
+              @if (isInvalid2('description')) {
+                <div class="invalid-feedback">Description obligatoire (min. 10 caractères).</div>
+              }
+            </div>
+            <div class="col-12">
+              <div class="form-check blesses-check">
+                <input type="checkbox" class="form-check-input" id="avecBlesses" formControlName="avecBlesses">
+                <label class="form-check-label" for="avecBlesses">
+                  <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                  Il y a eu des blessés — un PV de police sera requis
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+      }
+
+      <!-- ÉTAPE 3 -->
+      @if (step() === 3) {
+        <div>
+          <label for="fichiers" class="file-upload-zone">
+            <i class="fas fa-cloud-upload-alt me-2"></i>
+            Ajouter des fichiers
+            <span class="file-hint">Constat, carte grise, attestation, photos… (PDF, JPG, PNG)</span>
+          </label>
+          <input type="file" id="fichiers" multiple accept=".pdf,.jpg,.jpeg,.png"
+            (change)="onFilesSelected($event)" hidden>
+
+          @if (fichiers().length > 0) {
+            <ul class="file-list mt-2">
+              @for (f of fichiers(); track f.name; let i = $index) {
+                <li class="file-item">
+                  <i class="fas fa-file-alt text-muted me-2"></i>
+                  <span class="file-name">{{ f.name }}</span>
+                  <span class="file-size">{{ formatSize(f.size) }}</span>
+                  <button type="button" class="btn-remove-file" (click)="removeFile(i)" title="Supprimer">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="no-files-hint">Aucun fichier ajouté. L'ajout de documents accélère le traitement.</p>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      @if (step() === 1) {
+        <button class="btn btn-outline-secondary" (click)="close()">Annuler</button>
+        <button class="btn btn-primary ms-auto" (click)="goStep2()">
+          Suivant <i class="fas fa-arrow-right ms-1"></i>
+        </button>
+      }
+      @if (step() === 2) {
+        <button class="btn btn-outline-secondary" (click)="goBack(1)">
+          <i class="fas fa-arrow-left me-1"></i> Retour
+        </button>
+        <button class="btn btn-primary ms-auto" (click)="goStep3()">
+          Suivant <i class="fas fa-arrow-right ms-1"></i>
+        </button>
+      }
+      @if (step() === 3) {
+        <button class="btn btn-outline-secondary" (click)="goBack(2)" [disabled]="loading()">
+          <i class="fas fa-arrow-left me-1"></i> Retour
+        </button>
+        <button class="btn btn-danger ms-auto" (click)="submit()" [disabled]="loading() || !police()">
+          @if (loading()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>Envoi…
+          } @else {
+            <i class="fas fa-paper-plane me-1"></i> Déclarer
+          }
+        </button>
+      }
+    </div>
+
+  </div>
+</div>

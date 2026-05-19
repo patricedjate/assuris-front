@@ -1,0 +1,219 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Sinistres</h1>
+      <p class="page-sub">{{ data()?.totalElements ?? 0 }} sinistre(s) déclaré(s)</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert-error"><i class="fas fa-exclamation-circle"></i> {{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="loading"><div class="spinner"></div><p>Chargement…</p></div>
+  } @else if (data()?.contenu?.length === 0) {
+    <div class="empty"><i class="fas fa-car-crash"></i><p>Aucun sinistre trouvé.</p></div>
+  } @else {
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Référence</th><th>Date sinistre</th><th>Lieu</th>
+            <th>Blessés</th><th>Statut</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of data()?.contenu ?? []; track s.id) {
+            <tr [class.row-active]="dossier()?.id === s.id">
+              <td><span class="badge-ref">{{ s.reference }}</span></td>
+              <td>{{ s.dateSinistre | date:'dd/MM/yyyy' }}</td>
+              <td class="lieu-cell" [title]="s.lieu">{{ s.lieu }}</td>
+              <td>
+                @if (s.avecBlesses) {
+                  <span class="badge badge-red"><i class="fas fa-user-injured me-1"></i>Oui</span>
+                } @else {
+                  <span class="badge badge-green">Non</span>
+                }
+              </td>
+              <td><span [class]="'badge ' + statutClass(s.statut)">{{ s.statut }}</span></td>
+              <td class="action-cell">
+                <button class="btn-dossier" (click)="ouvrirDossier(s)">
+                  <i class="fas fa-folder-open me-1"></i>Ouvrir le dossier
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if ((data()?.totalPages ?? 0) > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="data()?.premiere" (click)="goPage(page() - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        @for (pg of pages; track pg) {
+          <button class="page-btn" [class.active]="pg === page()" (click)="goPage(pg)">{{ pg + 1 }}</button>
+        }
+        <button class="page-btn" [disabled]="data()?.derniere" (click)="goPage(page() + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    }
+  }
+</div>
+
+<!-- Drawer dossier sinistre -->
+@if (dossier()) {
+  <div class="drawer-overlay" (click)="fermerDossier()">
+    <aside class="dossier-drawer" (click)="$event.stopPropagation()">
+
+      <!-- En-tête -->
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="dossier-ref">{{ dossier()!.reference }}</span>
+          <span [class]="'badge ' + statutClass(dossier()!.statut)">{{ dossier()!.statut }}</span>
+        </div>
+        <button class="close-btn" (click)="fermerDossier()"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="drawer-body">
+
+        <!-- Section 1 : Informations du sinistre -->
+        <div class="section">
+          <h3 class="section-title"><i class="fas fa-info-circle me-2"></i>Informations du sinistre</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Date du sinistre</span>
+              <span class="info-value">{{ dossier()!.dateSinistre | date:'dd/MM/yyyy' }}</span>
+            </div>
+            @if (dossier()!.heure) {
+              <div class="info-item">
+                <span class="info-label">Heure</span>
+                <span class="info-value">{{ dossier()!.heure }}</span>
+              </div>
+            }
+            <div class="info-item">
+              <span class="info-label">Date de déclaration</span>
+              <span class="info-value">{{ dossier()!.dateDeclaration | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Police concernée</span>
+              <span class="info-value mono">#{{ dossier()!.policeId }}</span>
+            </div>
+            <div class="info-item full">
+              <span class="info-label">Lieu de l'accident</span>
+              <span class="info-value">{{ dossier()!.lieu }}</span>
+            </div>
+            <div class="info-item full">
+              <span class="info-label">Description des faits</span>
+              <p class="info-description">{{ dossier()!.description }}</p>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Blessés</span>
+              @if (dossier()!.avecBlesses) {
+                <span class="badge badge-red"><i class="fas fa-user-injured me-1"></i>Oui — PV requis</span>
+              } @else {
+                <span class="badge badge-green">Non</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2 : Pièces jointes -->
+        <div class="section">
+          <h3 class="section-title"><i class="fas fa-paperclip me-2"></i>Pièces jointes</h3>
+
+          @if (loadingDocs()) {
+            <div class="docs-loading">
+              <span class="spinner-xs"></span> Chargement des documents…
+            </div>
+          } @else if (documents().length === 0) {
+            <div class="docs-empty">
+              <i class="fas fa-file-slash"></i>
+              <span>Aucun document joint à ce dossier.</span>
+            </div>
+          } @else {
+            <div class="docs-grid">
+              @for (doc of documents(); track doc.id) {
+                <div class="doc-card">
+                  <div class="doc-icon">
+                    @if (isImage(doc)) {
+                      <i class="fas fa-file-image"></i>
+                    } @else if (isPdf(doc)) {
+                      <i class="fas fa-file-pdf"></i>
+                    } @else {
+                      <i class="fas fa-file-alt"></i>
+                    }
+                  </div>
+                  <div class="doc-info">
+                    <span class="doc-nom" [title]="doc.nom">{{ doc.nom }}</span>
+                    @if (doc.dateUpload) {
+                      <span class="doc-date">{{ doc.dateUpload | date:'dd/MM/yyyy' }}</span>
+                    }
+                  </div>
+                  <button class="doc-dl-btn"
+                    (click)="telechargerDocument(doc)"
+                    [disabled]="downloadingId() === doc.id"
+                    title="Télécharger">
+                    @if (downloadingId() === doc.id) {
+                      <span class="spinner-xs-inline"></span>
+                    } @else {
+                      <i class="fas fa-download"></i>
+                    }
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Section 3 : Changer le statut -->
+        <div class="section section-statut">
+          <h3 class="section-title"><i class="fas fa-exchange-alt me-2"></i>Changer le statut</h3>
+
+          <div class="statut-change-form">
+            <select class="statut-select-full"
+                    [ngModel]="nouveauStatut()"
+                    (ngModelChange)="nouveauStatut.set($event)">
+              @for (st of statuts; track st) {
+                <option [value]="st">{{ statutLabels[st] }}</option>
+              }
+            </select>
+
+            @if (dossier()!.statut !== nouveauStatut()) {
+              <div class="statut-preview">
+                <span [class]="'badge ' + statutClass(dossier()!.statut)">{{ dossier()!.statut }}</span>
+                <i class="fas fa-arrow-right mx-2 text-muted"></i>
+                <span [class]="'badge ' + statutClass(nouveauStatut())">{{ nouveauStatut() }}</span>
+              </div>
+            }
+
+            @if (changeSuccess()) {
+              <div class="change-success">
+                <i class="fas fa-check-circle me-2"></i>Statut mis à jour avec succès.
+              </div>
+            }
+            @if (changeError()) {
+              <div class="change-error">
+                <i class="fas fa-times-circle me-2"></i>{{ changeError() }}
+              </div>
+            }
+
+            <button class="btn-confirmer"
+              (click)="confirmerStatut()"
+              [disabled]="changing() || nouveauStatut() === dossier()!.statut">
+              @if (changing()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>Enregistrement…
+              } @else {
+                <i class="fas fa-check me-2"></i>Confirmer le changement
+              }
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+  </div>
+}
